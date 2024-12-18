@@ -22,3 +22,12 @@ Install requirements
 ```bash
 pip install -r requirements.txt
 ```
+
+Create a file called `.env`
+
+```text
+# .env
+DISCORD_TOKEN={your-bot-token}
+```
+
+The Discord bot token is a Github secret (on Discord's page it can only be shown **once**)
