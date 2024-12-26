@@ -31,6 +31,7 @@ class BotMain():
         log_config.LogConfig().setup(is_debug=is_debug)
         self._logger = logging.getLogger()
         self._logger.info("Logging setup complete.")
+        self._logger.debug(f"Program running in {os.getcwd()}.")
 
         self.bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=self._setupIntents())
         

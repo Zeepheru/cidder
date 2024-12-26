@@ -80,16 +80,16 @@ class LogConfig:
 
         # file handler
         # create dir first
-        if not os.path.exists("logs"):
-            os.mkdir("logs")
+        if not os.path.exists("./logs"):
+            os.mkdir("./logs")
 
         if not filename:
             fh = ConcurrentRotatingFileHandler(
-                "logs/log.txt", 
+                "./logs/log.txt", 
                 "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
         else:
             fh = ConcurrentRotatingFileHandler(
-                f"logs/{filename}", 
+                f"./logs/{filename}", 
                 "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
         fh.setLevel(level)
         fh.setFormatter(mainFormatter)
