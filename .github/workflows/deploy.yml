@@ -31,6 +31,13 @@ jobs:
             source venv/bin/activate
             pip install -r requirements.txt
 
+            # export environment variables
+            export DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            export DB_HOST=${{ secrets.DB_HOST }}
+            export DB_NAME=${{ secrets.DB_NAME }}
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
             echo "Starting application"
 
             # Restart the application
