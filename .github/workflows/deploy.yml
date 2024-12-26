@@ -22,7 +22,7 @@ jobs:
         command_timeout: 30m
         script: | 
            # Navigate to the application directory
-            cd /cidder
+            cd /root/cidder
 
             # Pull latest changes
             git pull origin main
