@@ -13,24 +13,24 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4  # Fetch the repository code
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.7.0
+    - name: SSH and Deploy
+      uses: appleboy/ssh-action@v0.1.10
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        host: ${{ secrets.SSH_HOST }}
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        command_timeout: 30m
+        script: | 
+           # Navigate to the application directory
+            cd /cidder
 
-    - name: Deploy to DigitalOcean Droplet VM
-      run: |
-        ssh -o StrictHostKeyChecking=no root@${{ secrets.SSH_HOST }} << 'EOF'
-        # Navigate to the application directory
-        cd /cidder
+            # Pull latest changes
+            git pull origin main
 
-        # Pull latest changes
-        git pull origin main
+            # Activate virtual environment and install dependencies
+            source venv/bin/activate
+            pip install -r requirements.txt
 
-        # Activate virtual environment and install dependencies
-        source venv/bin/activate
-        pip install -r requirements.txt
-
-        # Restart the application
-        sudo systemctl restart cidder.service
-        EOF
+            # Restart the application
+            sudo systemctl restart cidder.service
+            EOF
