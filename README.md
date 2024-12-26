@@ -37,5 +37,3 @@ DB_NAME={}
 DB_USER={}
 DB_PASSWORD={}
 ```
-
-The Discord bot token is a Github secret (on Discord's page it can only be shown **once**)
