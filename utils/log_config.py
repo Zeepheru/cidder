@@ -84,19 +84,25 @@ class LogConfig:
             os.mkdir("./logs")
 
         if not filename:
-            fh = ConcurrentRotatingFileHandler(
-                "./logs/log.txt", 
-                "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
-        else:
-            fh = ConcurrentRotatingFileHandler(
-                f"./logs/{filename}", 
-                "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
+            filename = "log.txt"
+
+        fh = ConcurrentRotatingFileHandler(
+            f"./logs/{filename}", 
+            "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
+        
         fh.setLevel(level)
         fh.setFormatter(mainFormatter)
 
         # add to Logger
         logger.addHandler(ch)
         logger.addHandler(fh)
+
+        # add a new line to the log file
+        with open(f"./logs/{filename}", "a") as f:
+            f.write(
+                "-------------------------------------------------------"
+                + "-----------------------------------------------------------------\n")
+            f.close()
 
 class ColoredFormatter(logging.Formatter):
     def format(self, record):
