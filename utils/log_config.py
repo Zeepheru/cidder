@@ -51,7 +51,7 @@ class Colors:
             del kernel32
 
 class LogConfig:
-    def setup(self, filename: Optional[str], is_debug: bool = False) -> None:
+    def setup(self, filename: Optional[str] = None, is_debug: bool = False) -> None:
         """
         sets up the root logger. (Called by `logging.getLogger()`)
         """

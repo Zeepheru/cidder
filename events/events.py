@@ -1,3 +1,5 @@
+import logging
+
 import discord
 from discord.ext import commands
 
@@ -8,13 +10,14 @@ class BotEvents:
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self._registerEvents()
+        self._logger = logging.getLogger()
 
     def _registerEvents(self) -> None:
         """Registers all events."""
 
         @self.bot.event
         async def on_ready() -> None:
-            print(f'Bot is ready. Logged in as {self.bot.user} | ID: {self.bot.user.id}')
+            self._logger.info(f'Bot is ready. Logged in as {self.bot.user} | ID: {self.bot.user.id}')
 
         @self.bot.event
         async def on_message(message: discord.Message) -> None:
@@ -27,4 +30,4 @@ class BotEvents:
             if user == self.bot.user:
                 return
             
-            print(f"[{user} in {channel}]: {content}")
+            self._logger.info(f"[{user} in {channel}]: {content}")

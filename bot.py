@@ -29,6 +29,7 @@ class BotMain():
         # load logger
         is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
         log_config.LogConfig().setup(is_debug=is_debug)
+        self._logger = logging.getLogger()
         self._logger.info("Logging setup complete.")
 
         self.bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=self._setupIntents())
@@ -41,7 +42,7 @@ class BotMain():
 
         events.BotEvents(self.bot)
 
-        # self.bot.run(self.TOKEN)
+        self.bot.run(self.TOKEN)
 
     def _setupIntents(self) -> discord.Intents:
         intents = discord.Intents.default()
