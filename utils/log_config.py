@@ -68,8 +68,8 @@ class LogConfig:
 
         logger.setLevel(level)
         
-        mainFormatter = logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s")
-        coloredFormatter = ColoredFormatter("[%(levelname)s]: %(message)s") # for use with stdout
+        mainFormatter = logging.Formatter("[%(asctime)s %(levelname)s]: %(message)s")
+        coloredFormatter = ColoredFormatter("[%(asctime)s %(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
         # console handler
         ch = logging.StreamHandler()
