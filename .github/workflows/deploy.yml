@@ -31,6 +31,7 @@ jobs:
             source venv/bin/activate
             pip install -r requirements.txt
 
+            echo "Starting application"
+
             # Restart the application
             sudo systemctl restart cidder.service
-            EOF
