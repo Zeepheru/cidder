@@ -39,7 +39,7 @@ class BotMain():
         self._loadTokens()
         self._logger.info("Token loading complete.")
         self._loadCogs()
-        self._logger.info("Logging complete.")
+        self._logger.info("Cog loading complete.")
 
         events.BotEvents(self.bot)
 
