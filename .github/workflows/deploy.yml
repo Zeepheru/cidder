@@ -1,0 +1,36 @@
+name: Deploy to DigitalOcean Droplet VM
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on push to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4  # Fetch the repository code
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy to DigitalOcean Droplet VM
+      run: |
+        ssh -o StrictHostKeyChecking=no root@${{ secrets.SSH_HOST }} << 'EOF'
+        # Navigate to the application directory
+        cd /cidder
+
+        # Pull latest changes
+        git pull origin main
+
+        # Activate virtual environment and install dependencies
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+        # Restart the application
+        sudo systemctl restart cidder.service
+        EOF
