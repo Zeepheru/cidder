@@ -28,7 +28,14 @@ Create a file called `.env`
 ```text
 # .env
 DISCORD_TOKEN={your-bot-token}
-DEBUG_MODE=0 # Disables extra logging messages
+# Disables extra logging messages
+DEBUG_MODE=0
+
+# DB
+DB_HOST={}
+DB_NAME={}
+DB_USER={}
+DB_PASSWORD={}
 ```
 
 The Discord bot token is a Github secret (on Discord's page it can only be shown **once**)

@@ -27,7 +27,9 @@ class BotMain():
         print("Bot initialising...")
 
         # load logger
+        print(os.getenv(DEBUG_MODE_STRING))
         is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
+        print(is_debug)
         log_config.LogConfig().setup(is_debug=is_debug)
         self._logger = logging.getLogger()
         self._logger.info("Logging setup complete.")
