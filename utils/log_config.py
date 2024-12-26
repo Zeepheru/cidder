@@ -3,6 +3,8 @@ import logging
 import os
 from typing import Optional
 
+from concurrent_log_handler import ConcurrentRotatingFileHandler
+
 
 class Colors:
     """ 
@@ -82,9 +84,13 @@ class LogConfig:
             os.mkdir("logs")
 
         if not filename:
-            fh = logging.FileHandler("logs/log.txt", encoding="utf-8")
+            fh = ConcurrentRotatingFileHandler(
+                "logs/log.txt", 
+                "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
         else:
-            fh = logging.FileHandler(f"logs/{filename}", encoding="utf-8")
+            fh = ConcurrentRotatingFileHandler(
+                f"logs/{filename}", 
+                "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
         fh.setLevel(level)
         fh.setFormatter(mainFormatter)
 
