@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import pkgutil
 
@@ -7,28 +8,40 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from events import events
+from utils import log_config
 
 # should move to a constants file
 TOKEN_STRING = 'DISCORD_TOKEN'
+DEBUG_MODE_STRING = 'DEBUG_MODE'
 COMMAND_PREFIX = '$'
 # INTENTS_INTEGER = 182272
 
 class BotMain():
     """Class used to handle bot startup"""
 
+    _logger: logging.Logger
+
     def __init__(self) -> None:
         """Initiallises the bot."""
 
         print("Bot initialising...")
 
-        self.bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=self._setupIntents())
+        # load logger
+        is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
+        log_config.LogConfig().setup(is_debug=is_debug)
+        self._logger.info("Logging setup complete.")
 
+        self.bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=self._setupIntents())
+        
+        # load tokens and cogs
         self._loadTokens()
+        self._logger.info("Token loading complete.")
         self._loadCogs()
+        self._logger.info("Logging complete.")
 
         events.BotEvents(self.bot)
 
-        self.bot.run(self.TOKEN)
+        # self.bot.run(self.TOKEN)
 
     def _setupIntents(self) -> discord.Intents:
         intents = discord.Intents.default()
@@ -47,7 +60,6 @@ class BotMain():
 
         for _, name, _ in pkgutil.iter_modules(['cogs']):
             self.bot.load_extension(f'cogs.{name}')
-
 
 def main():
     BotMain()
