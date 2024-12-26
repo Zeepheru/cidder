@@ -1,0 +1,44 @@
+name: Deploy to DigitalOcean Droplet VM
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on push to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4  # Fetch the repository code
+
+    - name: SSH and Deploy
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        command_timeout: 30m
+        script: | 
+           # Navigate to the application directory
+            cd /root/cidder
+
+            # Pull latest changes
+            git pull origin main
+
+            # Activate virtual environment and install dependencies
+            source venv/bin/activate
+            pip install -r requirements.txt
+
+            # export environment variables
+            export DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            export DB_HOST=${{ secrets.DB_HOST }}
+            export DB_NAME=${{ secrets.DB_NAME }}
+            export DB_USER=${{ secrets.DB_USER }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+            echo "Starting application"
+
+            # Restart the application
+            sudo systemctl restart cidder.service
