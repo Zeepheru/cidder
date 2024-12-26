@@ -11,5 +11,5 @@ numpy==2.2.0
 portalocker==3.0.0
 propcache==0.2.1
 python-dotenv==1.0.1
-pywin32==308
+pywin32==308; platform_system == "Windows"
 yarl==1.18.3
