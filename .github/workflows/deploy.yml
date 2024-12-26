@@ -42,3 +42,9 @@ jobs:
 
             # Restart the application
             sudo systemctl restart cidder.service
+
+            # Wait
+            sleep 0.5
+
+            # Status check
+            sudo systemctl status cidder.service
