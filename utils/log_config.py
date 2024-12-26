@@ -78,13 +78,13 @@ class LogConfig:
 
         # file handler
         # create dir first
-        if not os.path.exists("../logs"):
-            os.mkdir("../logs")
+        if not os.path.exists("logs"):
+            os.mkdir("logs")
 
         if not filename:
-            fh = logging.FileHandler("../logs/log.txt", encoding="utf-8")
+            fh = logging.FileHandler("logs/log.txt", encoding="utf-8")
         else:
-            fh = logging.FileHandler(f"../logs/{filename}", encoding="utf-8")
+            fh = logging.FileHandler(f"logs/{filename}", encoding="utf-8")
         fh.setLevel(level)
         fh.setFormatter(mainFormatter)
 
