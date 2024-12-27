@@ -10,6 +10,9 @@ multidict==6.1.0
 numpy==2.2.0
 portalocker==3.0.0
 propcache==0.2.1
+psycopg==3.2.3
 python-dotenv==1.0.1
 pywin32==308; platform_system == "Windows"
+typing_extensions==4.12.2
+tzdata==2024.2
 yarl==1.18.3
