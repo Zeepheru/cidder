@@ -16,12 +16,13 @@ COMMAND_PREFIX = '$'
 # INTENTS_INTEGER = 182272
 
 class BotMain():
-    """Class used to handle bot startup"""
+    """Class used to handle bot startup."""
 
     _logger: logging.Logger
 
     def __init__(self) -> None:
-        """Initiallises the bot."""
+        """Initiallises the bot.
+        """
 
         print("Bot initialising...")
 

@@ -13,7 +13,8 @@ class BotEvents:
         self._logger = logging.getLogger()
 
     def _register_events(self) -> None:
-        """Registers all events."""
+        """Registers all events.
+        """
 
         @self.bot.event
         async def on_ready() -> None:
