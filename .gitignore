@@ -1,6 +1,7 @@
 # project-specific
 logs/
 data/
+temp.txt
 
 # === https://github.com/github/gitignore/blob/main/Python.gitignore ===
 
