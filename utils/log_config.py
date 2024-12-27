@@ -97,7 +97,7 @@ class LogConfig:
             filename = "log.txt"
 
         fh = ConcurrentRotatingFileHandler(
-            f"./logs/{filename}", 
+            f"./logs/{filename}",
             "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
 
         fh.setLevel(level)
