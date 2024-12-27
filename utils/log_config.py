@@ -53,9 +53,18 @@ class Colors:
             del kernel32
 
 class LogConfig:
+    """Class that handles configuration for Python's `Logging`.
+    """
+    def __init__(self) -> None:
+        self._logger: logging.Logger
+
     def setup(self, filename: Optional[str] = None, is_debug: bool = False) -> None:
-        """
-        sets up the root logger. (Called by `logging.getLogger()`)
+        """Sets up the root logger, which can be called by `logging.getLogger()`
+
+        Args:
+            filename (Optional[str], optional): _description_. Defaults to None.
+            is_debug (bool, optional): _description_. Defaults to False.
+        """        """sets up the root logger. (Called by `logging.getLogger()`)
         """
         # should probably be broken down more
 
@@ -69,14 +78,15 @@ class LogConfig:
             level = logging.INFO
 
         logger.setLevel(level)
-        
-        mainFormatter = logging.Formatter("[%(asctime)s %(levelname)s]: %(message)s")
-        coloredFormatter = ColoredFormatter("[%(asctime)s %(levelname)s]: %(message)s", datefmt="%H:%M:%S")
+
+        main_formatter = logging.Formatter("[%(asctime)s %(levelname)s]: %(message)s")
+        colored_formatter = ColoredFormatter(
+            "[%(asctime)s %(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
         # console handler
         ch = logging.StreamHandler()
         ch.setLevel(level)
-        ch.setFormatter(coloredFormatter)
+        ch.setFormatter(colored_formatter)
 
         # file handler
         # create dir first
@@ -84,19 +94,25 @@ class LogConfig:
             os.mkdir("./logs")
 
         if not filename:
-            fh = ConcurrentRotatingFileHandler(
-                "./logs/log.txt", 
-                "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
-        else:
-            fh = ConcurrentRotatingFileHandler(
-                f"./logs/{filename}", 
-                "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
+            filename = "log.txt"
+
+        fh = ConcurrentRotatingFileHandler(
+            f"./logs/{filename}",
+            "a", maxBytes=20*1024*1024, backupCount=5) # 10MB, 5 backups
+
         fh.setLevel(level)
-        fh.setFormatter(mainFormatter)
+        fh.setFormatter(main_formatter)
 
         # add to Logger
         logger.addHandler(ch)
         logger.addHandler(fh)
+
+        # add a new line to the log file
+        with open(f"./logs/{filename}", "a", encoding="utf-8") as f:
+            f.write(
+                "-------------------------------------------------------"
+                + "-----------------------------------------------------------------\n")
+            f.close()
 
 class ColoredFormatter(logging.Formatter):
     def format(self, record):
@@ -113,7 +129,7 @@ class ColoredFormatter(logging.Formatter):
             selected = Colors.GRAY
         else:
             selected = Colors.PURPLE
-        
+
         new_msg = f"{selected}{record.msg}{Colors.RESET}"
 
         # create record copy
@@ -121,16 +137,16 @@ class ColoredFormatter(logging.Formatter):
         temp_record.msg = new_msg
 
         return logging.Formatter.format(self, temp_record)
-    
+
 if __name__ == "__main__":
-    
+
     # setup
     # note that filename is always this random testing file
     LogConfig().setup(is_debug=True, filename="logging-test.txt")
 
     # test formatting
-    logger = logging.debug("debug")
-    logger = logging.info("info")
-    logger = logging.warning("warning")
-    logger = logging.error("error")
-    logger = logging.critical("critical")
+    logging.debug("debug")
+    logging.info("info")
+    logging.warning("warning")
+    logging.error("error")
+    logging.critical("critical")

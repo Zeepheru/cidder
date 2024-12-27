@@ -9,15 +9,19 @@ class BotEvents:
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self._registerEvents()
+        self._register_events()
         self._logger = logging.getLogger()
 
-    def _registerEvents(self) -> None:
+    def _register_events(self) -> None:
         """Registers all events."""
 
         @self.bot.event
         async def on_ready() -> None:
-            self._logger.info(f'Bot is ready. Logged in as {self.bot.user} | ID: {self.bot.user.id}')
+            if self.bot.user:
+                self._logger.info("Bot is ready. Logged in as %s | ID:%s",
+                                  self.bot.user, self.bot.user.id)
+            else:
+                self._logger.warning("Bot is ready but not logged in.")
 
         @self.bot.event
         async def on_message(message: discord.Message) -> None:
@@ -29,5 +33,4 @@ class BotEvents:
             # ignore if message is from itself
             if user == self.bot.user:
                 return
-            
-            self._logger.info(f"[{user} in {channel}]: {content}")
+            self._logger.info("[%s in %s]: %s", user, channel, content)
