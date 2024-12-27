@@ -6,6 +6,8 @@
 # paths.
 # ignore=
 
+# Threshold for pylint failure
+fail-under=8.0  
 
 [MESSAGES CONTROL]
 
