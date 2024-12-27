@@ -6,15 +6,18 @@ from log_config import LogConfig
 
 
 class Database:
-    def __init__(self, host:str | None = None) -> None:
-        """Initiates connection with the database."""
+    def __init__(self, host:str = os.getenv("DB_HOST")) -> None:
+        """Initialises a connection to the database.
+
+        Args:
+            host (str, optional): Host name override. Defaults to the host name supplied in the environment.
+        """
 
         self._logger = logging.getLogger()
         self._conn = None
 
         # initiate connection
-        if not host:
-            host = os.getenv("DB_HOST")
+        dbhost = host
         dbname = os.getenv("DB_NAME")
         dbuser = os.getenv("DB_USER")
         dbpassword = os.getenv("DB_PASSWORD")
@@ -23,7 +26,7 @@ class Database:
             "dbname": dbname,
             "user": dbuser,
             "password": dbpassword,
-            "host": host,  
+            "host": dbhost,  
             "port": 5432 # default PostgreSQL port
         }
 
