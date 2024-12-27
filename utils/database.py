@@ -2,15 +2,18 @@ import logging
 import os
 
 import psycopg
-from log_config import LogConfig
+
+from utils.log_config import LogConfig
 
 
 class Database:
-    def __init__(self, host:str = os.getenv("DB_HOST")) -> None:
+    """Class that handles communication with the PostgreSQL database.
+    """
+    def __init__(self, host: str = os.getenv("DB_HOST")) -> None:
         """Initialises a connection to the database.
 
         Args:
-            host (str, optional): Host name override. Defaults to the host name supplied in the environment.
+            host (str): Host name override. Defaults to the host name supplied in the environment.
         """
 
         self._logger = logging.getLogger()
@@ -22,7 +25,7 @@ class Database:
         dbuser = os.getenv("DB_USER")
         dbpassword = os.getenv("DB_PASSWORD")
 
-        DB_CONFIG = {
+        db_config = {
             "dbname": dbname,
             "user": dbuser,
             "password": dbpassword,
@@ -31,12 +34,12 @@ class Database:
         }
 
         try:
-            with psycopg.connect(**DB_CONFIG) as conn:
-                self._logger.info("Connected to the database.")
-                self._conn = conn
+            conn = psycopg.connect(**db_config)
+            self._logger.info("Connected to the database.")
+            self._conn = conn
 
         except psycopg.Error as e:
-            self._logger.error(f"Unable to connect to the database: {e}")
+            self._logger.error("Unable to connect to the database: %s", e)
 
 
 

@@ -2,7 +2,16 @@ import psycopg
 
 
 def table_exists(conn: psycopg.Connection, table_name: str) -> bool:
-    """Check if a table exists in the database."""
+    """Check if a table exists in the database.
+
+    Args:
+        conn (psycopg.Connection): Postgres connection.
+        table_name (str): Table name to check.
+
+    Returns:
+        bool: Whether the table exists.
+    """
+
     query = """
     SELECT EXISTS (
         SELECT 1 

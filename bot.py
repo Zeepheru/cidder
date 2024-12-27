@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os
 import pkgutil
@@ -33,10 +32,10 @@ class BotMain():
         log_config.LogConfig().setup(is_debug=is_debug)
         self._logger = logging.getLogger()
         self._logger.info("Logging setup complete.")
-        self._logger.debug(f"Program running in {os.getcwd()}.")
+        self._logger.debug("Program running in %s.", os.getcwd())
 
         self.bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=self._setup_intents())
-        
+
         # load tokens and cogs
         self._load_tokens()
         self._logger.info("Token loading complete.")
@@ -45,7 +44,7 @@ class BotMain():
 
         events.BotEvents(self.bot)
 
-        self.bot.run(self.TOKEN)
+        self.bot.run(self._token)
 
     def _setup_intents(self) -> discord.Intents:
         intents = discord.Intents.default()
@@ -57,7 +56,7 @@ class BotMain():
         """Loads tokens into the object."""
 
         load_dotenv()
-        self.TOKEN = os.getenv(TOKEN_STRING)
+        self._token = os.getenv(TOKEN_STRING)
 
     def _load_cogs(self) -> None:
         """Loads Cogs (in `./cogs/*`) into the bot."""
