@@ -108,6 +108,15 @@ class LogConfig:
         logger.addHandler(fh)
 
         # add a new line to the log file
+        self.write_newline_to_logfile(filename=filename)
+
+    def write_newline_to_logfile(self, filename: str) -> None:
+        """Writes a new line to the specified log file. Path to log file must exist.
+
+        Args:
+            filename (str): Log file to write to. File is relative to the ./logs/directory.
+        """
+
         with open(f"./logs/{filename}", "a", encoding="utf-8") as f:
             f.write(
                 "-------------------------------------------------------"
