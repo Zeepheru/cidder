@@ -24,11 +24,14 @@ class BotMain():
         """Initiallises the bot.
         """
 
+        # this is the only print statement in the entire project I promise
         print("Bot initialising...")
 
         # load logger
         is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
-        log_config.LogConfig().setup(is_debug=is_debug)
+        log_config_handler = log_config.LogConfig()
+
+        log_config_handler.setup(is_debug=is_debug)
         if is_debug:
             logging.info("DEBUG mode is enabled.")
 
@@ -47,7 +50,7 @@ class BotMain():
         # creates events
         events.BotEvents(self.bot)
 
-        self.bot.run(self._token)
+        self.bot.run(self._token, log_handler=log_config_handler.get_discord_logging_handler())
 
     def _setup_intents(self) -> discord.Intents:
         intents = discord.Intents.default()

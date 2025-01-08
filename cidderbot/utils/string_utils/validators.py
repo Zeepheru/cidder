@@ -11,4 +11,5 @@ def validate_ansi_color_code(string: str) -> bool:
         bool: Whether string is an ANSI color code.
     """
 
-    return re.search(r'\x1b\[[0-9;]+m', string) is not None
+    is_valid = re.search(r'\x1b\[[0-9;]+m', string) is not None
+    return is_valid

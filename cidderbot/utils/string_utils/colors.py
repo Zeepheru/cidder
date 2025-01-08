@@ -62,7 +62,7 @@ def colorize_string(string: str, color_code: str) -> str:
         str: Colorised string.
     """
 
-    if validate_ansi_color_code(string):
+    if validate_ansi_color_code(color_code):
         return f"{color_code}{string}{Colors.RESET}"
 
     logging.warning("Supplied color code %s is not valid.", color_code)

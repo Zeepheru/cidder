@@ -3,6 +3,7 @@ import os
 import re
 from typing import Optional
 
+import discord
 from concurrent_log_handler import ConcurrentRotatingFileHandler
 
 from cidderbot.utils.string_utils.colors import Colors, colorize_string
@@ -25,6 +26,9 @@ class LogConfig:
 
     def __init__(self) -> None:
         self._logger: logging.Logger
+
+        # this is needed because I need to get this handler later
+        self.discord_handler = None
 
     def setup(self, filename: Optional[str] = None, is_debug: bool = False) -> None:
         """Sets up the discord logger, used internally by the discord Python module, and
@@ -55,22 +59,22 @@ class LogConfig:
         # Bummer for you I guess
 
         # ======== FORMATTERS ========
-        formatter_full = logging.Formatter("[%(asctime)s %(levelname)s]: %(message)s")
-        formatter_full_color = ColoredFormatter("[%(asctime)s %(levelname)s]: %(message)s")
+        formatter_full = logging.Formatter(fmt="[%(asctime)s %(levelname)s] %(message)s")
+        formatter_full_color = ColoredFormatter(fmt="[%(asctime)s %(levelname)s] %(message)s")
         formatter_shorttime_color = ColoredFormatter(
-            "[%(asctime)s %(levelname)s]: %(message)s", datefmt="%H:%M:%S")
+            fmt="[%(asctime)s %(levelname)s] %(message)s", datefmt="%H:%M:%S")
 
         # ======== CONSOLE HANDLER ===================
         ch = logging.StreamHandler()
         ch.setLevel(level)
         ch.setFormatter(formatter_shorttime_color)
 
-        logger_discord.addHandler(ch)
+        # logger_discord.addHandler(ch) #duplicates messages, I think
         logger.addHandler(ch)
 
         # ======== FILE HANDLERS ===================
         if not filename:
-            filename = "log.txt"
+            filename = self.DEFAULT_LOG_FILE
 
         filename_plaintext = self._add_suffix_to_filename(filename, self.DEFAULT_PLAINTEXT_SUFFIX)
         filename_discord = self._add_suffix_to_filename(filename, self.DEFAULT_DISCORD_SUFFIX)
@@ -85,18 +89,29 @@ class LogConfig:
         fh_plain = self._create_default_filehandler(filename_plaintext, level, formatter_full)
         fh_plain_discord = self._create_default_filehandler(filename_plaintext, logging.WARNING, formatter_full)
         fh_discordfile = self._create_default_filehandler(filename_discord, level, formatter_full_color)
+        self.discord_handler = fh_discordfile
 
         logger.addHandler(fh)
         logger.addHandler(fh_plain)
         logger_discord.addHandler(fh_discord)
         logger_discord.addHandler(fh_plain_discord)
-        logger_discord.addHandler(fh_discordfile)
+        # logger_discord.addHandler(fh_discordfile)
 
         # add a new line to all log files
-        map(self._write_newline_to_logfile, [filename, filename_discord, filename_plaintext])
+        # FUCK YOU WHY IS MAP LAZY
+        list(map(self._write_newline_to_logfile, (filename, filename_discord, filename_plaintext)))
+
+        # DISCORD
+        # self._set_discord_logger_configs(fh_discordfile)
+
+    # ==== Public methods ====
+    def get_discord_logging_handler(self) -> logging.Handler | None:
+        if not self.discord_handler:
+            logging.warning("Discord handler is not yet initialised.")
+            return None
+        return self.discord_handler
 
     # ==== Logger setup ====
-
     def _get_main_logger(self, min_level: int) -> logging.Logger:
         logger = logging.getLogger()
         logger.setLevel(min_level)
@@ -104,8 +119,14 @@ class LogConfig:
 
     def _get_discord_logger(self, min_level: int) -> logging.Logger:
         discord_logger = logging.getLogger('discord')
+        discord_logger = logging.getLogger()
         discord_logger.setLevel(min_level)
         return discord_logger
+
+    def _set_discord_logger_configs(self, handler: logging.Handler) -> None:
+        """Configures the Discord logger, I have to do this for... reasons??
+        """
+        discord.utils.setup_logging(handler=handler, level=logging.WARNING)
 
     # ==== Handlers ====
     def _create_default_filehandler(self, filename: str, level: int, formatter: logging.Formatter) -> logging.Handler:
@@ -184,26 +205,27 @@ class ColoredFormatter(logging.Formatter):
 
     def __init__(self, *args, **kwargs):
         if 'fmt' in kwargs:
-            self.fmt = kwargs['fmt']
+            self.used_format = kwargs['fmt']
         else:
-            self.fmt = self.DEFAULT_FORMAT
+            self.used_format = self.DEFAULT_FORMAT
+
+        self.kwargs = kwargs
+        self.args = args
 
         super().__init__(*args, **kwargs)
 
     def format(self, record):
-        # This pylint error is disabled because there's no way to access a Formatter's format otherwise ._.
-        # pylint: disable-next=protected-access
-        color_appended_format = format_message_from_level(self.format, record.levelno)
-        colored_formatter = logging.Formatter(color_appended_format)
+        color_appended_format = format_message_from_level(self.used_format, record.levelno)
+        self.kwargs["fmt"] = color_appended_format
+        colored_formatter = logging.Formatter(*self.args, **self.kwargs)
 
-        return colored_formatter.format(record.msg)
+        return colored_formatter.format(record)
 
 # For manual testing
 def main():
-
     # setup
     # note that filename is always this random testing file
-    LogConfig().setup(is_debug=True, filename="_TEST_logging.txt")
+    LogConfig().setup(is_debug=True, filename="_TEST.log")
 
     # test formatting
     logging.debug("debug")
