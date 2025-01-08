@@ -41,6 +41,7 @@ class BotMain():
         self._load_cogs()
         self._logger.info("Cog loading complete.")
 
+        # creates events
         events.BotEvents(self.bot)
 
         self.bot.run(self._token)
