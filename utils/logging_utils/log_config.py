@@ -77,7 +77,7 @@ class LogConfig:
         """Writes a new line to the specified log file. Path to log file must exist.
 
         Args:
-            filename (str): Log file to write to. File is relative to the ./logs/directory.
+            filename (str): Log file to write to. Filename should be relative to the ./logs/ directory.
         """
 
         with open(f"./logs/{filename}", "a", encoding="utf-8") as f:
@@ -87,7 +87,7 @@ class LogConfig:
             f.close()
 
 def format_message_from_level(message: str, level: int) -> str:
-    return colorize_string(message, LOG_LEVEL_COLORS[level])
+    return colorize_string(message, LOG_LEVEL_COLORS.get(level, Colors.PURPLE))
 
 class ColoredFormatter(logging.Formatter):
     def format(self, record):
