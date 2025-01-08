@@ -7,7 +7,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from events import events
-from utils import log_config
+from utils.logging_utils import log_config
 
 # should move to a constants file
 TOKEN_STRING = 'DISCORD_TOKEN'
