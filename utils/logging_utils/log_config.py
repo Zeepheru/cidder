@@ -5,8 +5,15 @@ from typing import Optional
 
 from concurrent_log_handler import ConcurrentRotatingFileHandler
 
-from ..string_utils.colors import Colors
+from ..string_utils.colors import Colors, colorize_string
 
+LOG_LEVEL_COLORS = {
+    logging.CRITICAL: Colors.RED,
+    logging.ERROR: Colors.ORANGE,
+    logging.WARNING: Colors.YELLOW,
+    logging.INFO: Colors.RESET,
+    logging.DEBUG: Colors.GRAY
+}
 
 class LogConfig:
     """Class that handles configuration for Python's `Logging`.
@@ -64,9 +71,9 @@ class LogConfig:
         logger.addHandler(fh)
 
         # add a new line to the log file
-        self.write_newline_to_logfile(filename=filename)
+        self._write_newline_to_logfile(filename=filename)
 
-    def write_newline_to_logfile(self, filename: str) -> None:
+    def _write_newline_to_logfile(self, filename: str) -> None:
         """Writes a new line to the specified log file. Path to log file must exist.
 
         Args:
@@ -79,23 +86,12 @@ class LogConfig:
                 + "-----------------------------------------------------------------\n")
             f.close()
 
+def format_message_from_level(message: str, level: int) -> str:
+    return colorize_string(message, LOG_LEVEL_COLORS[level])
+
 class ColoredFormatter(logging.Formatter):
     def format(self, record):
-        selected: str
-        if record.levelno == logging.CRITICAL:
-            selected = Colors.RED
-        elif record.levelno == logging.ERROR:
-            selected = Colors.ORANGE
-        elif record.levelno == logging.WARNING:
-            selected = Colors.YELLOW
-        elif record.levelno == logging.INFO:
-            selected = Colors.RESET
-        elif record.levelno == logging.DEBUG:
-            selected = Colors.GRAY
-        else:
-            selected = Colors.PURPLE
-
-        new_msg = f"{selected}{record.msg}{Colors.RESET}"
+        new_msg = format_message_from_level(record.msg, record.levelno)
 
         # create record copy
         temp_record = copy.copy(record)
