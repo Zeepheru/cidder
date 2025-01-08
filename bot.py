@@ -29,6 +29,9 @@ class BotMain():
         # load logger
         is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
         log_config.LogConfig().setup(is_debug=is_debug)
+        if is_debug:
+            logging.info("DEBUG mode is enabled.")
+
         self._logger = logging.getLogger()
         self._logger.info("Logging setup complete.")
         self._logger.debug("Program running in %s.", os.getcwd())
