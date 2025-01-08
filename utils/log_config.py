@@ -66,7 +66,7 @@ class LogConfig:
             is_debug (bool, optional): _description_. Defaults to False.
         """        """sets up the root logger. (Called by `logging.getLogger()`)
         """
-        # should probably be broken down more
+        #TODO should probably be broken down more - split up this long function
 
         self._logger = logging.getLogger()
         logger = self._logger
