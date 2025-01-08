@@ -6,8 +6,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from events import events
-from utils import log_config
+from cidderbot.events import events
+from cidderbot.utils.logging_utils import log_config
 
 # should move to a constants file
 TOKEN_STRING = 'DISCORD_TOKEN'
@@ -16,20 +16,25 @@ COMMAND_PREFIX = '$'
 # INTENTS_INTEGER = 182272
 
 class BotMain():
-    """Class used to handle bot startup"""
+    """Class used to handle bot startup."""
 
     _logger: logging.Logger
 
     def __init__(self) -> None:
-        """Initiallises the bot."""
+        """Initiallises the bot.
+        """
 
+        # this is the only print statement in the entire project I promise
         print("Bot initialising...")
 
         # load logger
-        print(os.getenv(DEBUG_MODE_STRING))
         is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
-        print(is_debug)
-        log_config.LogConfig().setup(is_debug=is_debug)
+        log_config_handler = log_config.LogConfig()
+
+        log_config_handler.setup(is_debug=is_debug)
+        if is_debug:
+            logging.info("DEBUG mode is enabled.")
+
         self._logger = logging.getLogger()
         self._logger.info("Logging setup complete.")
         self._logger.debug("Program running in %s.", os.getcwd())
@@ -42,9 +47,10 @@ class BotMain():
         self._load_cogs()
         self._logger.info("Cog loading complete.")
 
+        # creates events
         events.BotEvents(self.bot)
 
-        self.bot.run(self._token)
+        self.bot.run(self._token, log_handler=log_config_handler.get_discord_logging_handler())
 
     def _setup_intents(self) -> discord.Intents:
         intents = discord.Intents.default()

@@ -3,6 +3,9 @@ logs/
 data/
 temp.txt
 
+# VSCode
+.vscode
+
 # === https://github.com/github/gitignore/blob/main/Python.gitignore ===
 
 # Byte-compiled / optimized / DLL files

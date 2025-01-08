@@ -3,7 +3,7 @@ import os
 
 import psycopg
 
-from utils.log_config import LogConfig
+from cidderbot.utils.logging_utils.log_config import LogConfig
 
 
 class Database:
@@ -44,6 +44,6 @@ class Database:
 
 
 if __name__ == "__main__":
-    LogConfig().setup(is_debug=True, filename="dev-log-database.txt")
+    LogConfig().setup(is_debug=True, filename="_DEV-database-log.txt")
 
     db = Database()
