@@ -61,9 +61,13 @@ def colorize_string(string: str, color_code: str) -> str:
     Returns:
         str: Colorised string.
     """
-
+    # print(f"CODE: {color_code}, validation: {validate_ansi_color_code(color_code)}")
     if validate_ansi_color_code(color_code):
         return f"{color_code}{string}{Colors.RESET}"
+
+    if not __import__("sys").stdout.isatty():
+        # Not a terminal!
+        return string
 
     logging.warning("Supplied color code %s is not valid.", color_code)
     return string
