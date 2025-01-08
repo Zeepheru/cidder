@@ -3,7 +3,7 @@ import os
 
 import psycopg
 
-from utils.logging_utils.log_config import LogConfig
+from cidderbot.utils.logging_utils.log_config import LogConfig
 
 
 class Database:

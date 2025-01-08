@@ -1,7 +1,7 @@
 
 import logging
 
-from .validators import validate_ansi_color_code
+from cidderbot.utils.string_utils.validators import validate_ansi_color_code
 
 
 class Colors:

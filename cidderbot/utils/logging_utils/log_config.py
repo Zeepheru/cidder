@@ -5,7 +5,7 @@ from typing import Optional
 
 from concurrent_log_handler import ConcurrentRotatingFileHandler
 
-from ..string_utils.colors import Colors, colorize_string
+from cidderbot.utils.string_utils.colors import Colors, colorize_string
 
 LOG_LEVEL_COLORS = {
     logging.CRITICAL: Colors.RED,
