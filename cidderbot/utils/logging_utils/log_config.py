@@ -39,6 +39,8 @@ class LogConfig:
         - cidder_plaintext.log: main logger (level), discord (WARNING) - but with no color/ANSI formatting
         - cidder_discord.log: discord (level)
 
+        Note: in a running environment that is not attached to a terminal, all colored outputs are disabled.
+
         Args:
             filename (Optional[str], optional): _description_. Defaults to None.
             is_debug (bool, optional): _description_. Defaults to False.
