@@ -13,14 +13,16 @@ class BotEvents:
         self._logger = logging.getLogger()
 
     def _register_events(self) -> None:
-        """Registers all events.
-        """
+        """Registers all events."""
 
         @self.bot.event
         async def on_ready() -> None:
             if self.bot.user:
-                self._logger.info("Bot is ready. Logged in as %s | ID:%s",
-                                  self.bot.user, self.bot.user.id)
+                self._logger.info(
+                    "Bot is ready. Logged in as %s | ID:%s",
+                    self.bot.user,
+                    self.bot.user.id,
+                )
             else:
                 self._logger.warning("Bot is ready but not logged in.")
 

@@ -13,5 +13,6 @@ class Rp(commands.Cog):
     #     # await ctx.send(f'{member} has been banned.')
     #     pass
 
+
 def setup(bot):
     bot.add_cog(Rp(bot))

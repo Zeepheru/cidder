@@ -1,16 +1,16 @@
-
 import logging
 
 from cidderbot.utils.string_utils.validators import validate_ansi_color_code
 
 
 class Colors:
-    """ 
-    ANSI color codes. 
+    """
+    ANSI color codes.
     Credit to https://gist.github.com/rene-d/9e584a7dd2935d0f461904b9f2950007
 
     For 256 colors https://gist.github.com/JBlond/2fea43a3049b38287e5e9cefc87b2124
     """
+
     BLACK = "\033[0;30m"
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
@@ -50,6 +50,7 @@ class Colors:
             kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
             del kernel32
 
+
 def colorize_string(string: str, color_code: str) -> str:
     """Colorizes given string with given color code, applying the appropriate ANSI escape codes.
     If the supplied color code is invalid, the string will not be formatted.
@@ -57,7 +58,7 @@ def colorize_string(string: str, color_code: str) -> str:
     Args:
         string (str): String to be colored.
         color (str): ANSI escape code for color.
-    
+
     Returns:
         str: Colorised string.
     """
