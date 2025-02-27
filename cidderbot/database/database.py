@@ -7,8 +7,8 @@ from cidderbot.utils.logging_utils.log_config import LogConfig
 
 
 class Database:
-    """Class that handles communication with the PostgreSQL database.
-    """
+    """Class that handles communication with the PostgreSQL database."""
+
     def __init__(self, host: str = os.getenv("DB_HOST")) -> None:
         """Initialises a connection to the database.
 
@@ -29,8 +29,8 @@ class Database:
             "dbname": dbname,
             "user": dbuser,
             "password": dbpassword,
-            "host": dbhost,  
-            "port": 5432 # default PostgreSQL port
+            "host": dbhost,
+            "port": 5432,  # default PostgreSQL port
         }
 
         try:
@@ -40,7 +40,6 @@ class Database:
 
         except psycopg.Error as e:
             self._logger.error("Unable to connect to the database: %s", e)
-
 
 
 if __name__ == "__main__":

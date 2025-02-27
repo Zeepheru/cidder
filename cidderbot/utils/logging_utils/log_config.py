@@ -13,12 +13,13 @@ LOG_LEVEL_COLORS = {
     logging.ERROR: Colors.ORANGE,
     logging.WARNING: Colors.YELLOW,
     logging.INFO: Colors.RESET,
-    logging.DEBUG: Colors.GRAY
+    logging.DEBUG: Colors.GRAY,
 }
 
+
 class LogConfig:
-    """Class that handles configuration for Python's `Logging`.
-    """
+    """Class that handles configuration for Python's `Logging`."""
+
     LOG_PATH = "logs"
     DEFAULT_LOG_FILE = "cidder.log"
     DEFAULT_DISCORD_SUFFIX = "_discord"
@@ -39,10 +40,11 @@ class LogConfig:
         - cidder_plaintext.log: main logger (level), discord (WARNING) - but with no color/ANSI formatting
         - cidder_discord.log: discord (level)
 
+        Note: in a running environment that is not attached to a terminal, all colored outputs are disabled.
+
         Args:
             filename (Optional[str], optional): _description_. Defaults to None.
             is_debug (bool, optional): _description_. Defaults to False.
-        """        """sets up the root logger. (Called by `logging.getLogger()`)
         """
 
         # set logging min level
@@ -59,10 +61,15 @@ class LogConfig:
         # Bummer for you I guess
 
         # ======== FORMATTERS ========
-        formatter_full = logging.Formatter(fmt="[%(asctime)s %(levelname)s] %(message)s")
-        formatter_full_color = ColoredFormatter(fmt="[%(asctime)s %(levelname)s] %(message)s")
+        formatter_full = logging.Formatter(
+            fmt="[%(asctime)s %(levelname)s] %(message)s"
+        )
+        formatter_full_color = ColoredFormatter(
+            fmt="[%(asctime)s %(levelname)s] %(message)s"
+        )
         formatter_shorttime_color = ColoredFormatter(
-            fmt="[%(asctime)s %(levelname)s] %(message)s", datefmt="%H:%M:%S")
+            fmt="[%(asctime)s %(levelname)s] %(message)s", datefmt="%H:%M:%S"
+        )
 
         # ======== CONSOLE HANDLER ===================
         ch = logging.StreamHandler()
@@ -76,19 +83,31 @@ class LogConfig:
         if not filename:
             filename = self.DEFAULT_LOG_FILE
 
-        filename_plaintext = self._add_suffix_to_filename(filename, self.DEFAULT_PLAINTEXT_SUFFIX)
-        filename_discord = self._add_suffix_to_filename(filename, self.DEFAULT_DISCORD_SUFFIX)
+        filename_plaintext = self._add_suffix_to_filename(
+            filename, self.DEFAULT_PLAINTEXT_SUFFIX
+        )
+        filename_discord = self._add_suffix_to_filename(
+            filename, self.DEFAULT_DISCORD_SUFFIX
+        )
 
         self._setup_log_directory()
 
         # MAIN LOG FILE
         fh = self._create_default_filehandler(filename, level, formatter_full_color)
-        fh_discord = self._create_default_filehandler(filename, logging.WARNING, formatter_full_color)
+        fh_discord = self._create_default_filehandler(
+            filename, logging.WARNING, formatter_full_color
+        )
 
         # DIFF LOG FILES
-        fh_plain = self._create_default_filehandler(filename_plaintext, level, formatter_full)
-        fh_plain_discord = self._create_default_filehandler(filename_plaintext, logging.WARNING, formatter_full)
-        fh_discordfile = self._create_default_filehandler(filename_discord, level, formatter_full_color)
+        fh_plain = self._create_default_filehandler(
+            filename_plaintext, level, formatter_full
+        )
+        fh_plain_discord = self._create_default_filehandler(
+            filename_plaintext, logging.WARNING, formatter_full
+        )
+        fh_discordfile = self._create_default_filehandler(
+            filename_discord, level, formatter_full_color
+        )
         self.discord_handler = fh_discordfile
 
         logger.addHandler(fh)
@@ -99,7 +118,12 @@ class LogConfig:
 
         # add a new line to all log files
         # FUCK YOU WHY IS MAP LAZY
-        list(map(self._write_newline_to_logfile, (filename, filename_discord, filename_plaintext)))
+        list(
+            map(
+                self._write_newline_to_logfile,
+                (filename, filename_discord, filename_plaintext),
+            )
+        )
 
         # DISCORD
         # self._set_discord_logger_configs(fh_discordfile)
@@ -118,19 +142,20 @@ class LogConfig:
         return logger
 
     def _get_discord_logger(self, min_level: int) -> logging.Logger:
-        discord_logger = logging.getLogger('discord')
+        discord_logger = logging.getLogger("discord")
         discord_logger = logging.getLogger()
         discord_logger.setLevel(min_level)
         return discord_logger
 
     def _set_discord_logger_configs(self, handler: logging.Handler) -> None:
-        """Configures the Discord logger, I have to do this for... reasons??
-        """
+        """Configures the Discord logger, I have to do this for... reasons??"""
         discord.utils.setup_logging(handler=handler, level=logging.WARNING)
 
     # ==== Handlers ====
-    def _create_default_filehandler(self, filename: str, level: int, formatter: logging.Formatter) -> logging.Handler:
-        """Creates a default file handler using ConcurrentRotatingFileHandler. 
+    def _create_default_filehandler(
+        self, filename: str, level: int, formatter: logging.Formatter
+    ) -> logging.Handler:
+        """Creates a default file handler using ConcurrentRotatingFileHandler.
         10 MB, 5 backups.
 
         Args:
@@ -141,9 +166,12 @@ class LogConfig:
         Returns:
             Handler.Logger: The Handler instance.
         """
-        cfh =  ConcurrentRotatingFileHandler(
+        cfh = ConcurrentRotatingFileHandler(
             self._create_full_log_filepath(filename=filename),
-            "a", maxBytes=20*1024*1024, backupCount=5) 
+            "a",
+            maxBytes=20 * 1024 * 1024,
+            backupCount=5,
+        )
         cfh.setLevel(level)
         cfh.setFormatter(formatter)
 
@@ -172,14 +200,13 @@ class LogConfig:
         Returns:
             str: Filename with appended suffix.
         """
-        replaced = re.sub(r'(\.[A-Za-z0-9]{3,4}$)', suffix + r'\1', filename)
+        replaced = re.sub(r"(\.[A-Za-z0-9]{3,4}$)", suffix + r"\1", filename)
         return replaced
 
     # ==== File System ====
 
     def _setup_log_directory(self) -> None:
-        """Sets up the directory for log files, i.e. creates the directory if it does not exist.
-        """
+        """Sets up the directory for log files, i.e. creates the directory if it does not exist."""
         # create dir first
         if not os.path.exists(self.LOG_PATH):
             os.mkdir(self.LOG_PATH)
@@ -194,18 +221,21 @@ class LogConfig:
         with open(self._create_full_log_filepath(filename), "a", encoding="utf-8") as f:
             f.write(
                 "-------------------------------------------------------"
-                + "-----------------------------------------------------------------\n")
+                + "-----------------------------------------------------------------\n"
+            )
             f.close()
+
 
 def format_message_from_level(message: str, level: int) -> str:
     return colorize_string(message, LOG_LEVEL_COLORS.get(level, Colors.PURPLE))
+
 
 class ColoredFormatter(logging.Formatter):
     DEFAULT_FORMAT = "[%(asctime)s %(levelname)s]: %(message)s"
 
     def __init__(self, *args, **kwargs):
-        if 'fmt' in kwargs:
-            self.used_format = kwargs['fmt']
+        if "fmt" in kwargs:
+            self.used_format = kwargs["fmt"]
         else:
             self.used_format = self.DEFAULT_FORMAT
 
@@ -215,11 +245,14 @@ class ColoredFormatter(logging.Formatter):
         super().__init__(*args, **kwargs)
 
     def format(self, record):
-        color_appended_format = format_message_from_level(self.used_format, record.levelno)
+        color_appended_format = format_message_from_level(
+            self.used_format, record.levelno
+        )
         self.kwargs["fmt"] = color_appended_format
         colored_formatter = logging.Formatter(*self.args, **self.kwargs)
 
         return colored_formatter.format(record)
+
 
 # For manual testing
 def main():

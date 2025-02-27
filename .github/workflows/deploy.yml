@@ -40,6 +40,9 @@ jobs:
 
             echo "Starting application"
 
+            # Restart daemon
+            sudo systemctl daemon-reload
+
             # Restart the application
             sudo systemctl restart cidder.service
 
