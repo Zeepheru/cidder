@@ -2,9 +2,9 @@ import logging
 from datetime import datetime, timedelta
 from typing import List
 
+import discord
 from discord.ext import commands
 
-from cidderbot.models.guilds import CidderGuild
 from cidderbot.utils.time_formatters import (
     TimeUnit,
     convert_time_unit_string,
@@ -12,17 +12,45 @@ from cidderbot.utils.time_formatters import (
 )
 
 
+# I can't type annotate cidder because of circular imports. Must mean this whole thing is incredibly jank.
+# And there probably is a "correct" way I can't be arsed to figure out.
 class Rp(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot, cidder):
         self.bot = bot
+        self.cidder = cidder
 
+        logging.info("[COG] loaded RP cog")
+
+    @commands.command()
+    async def date(self, ctx):
+        rp: RpHandler = self.cidder.get_rps_for_guild(ctx.guild)[
+            0
+        ]  # very advanced code :+1:
+
+        curr_time_str = rp.get_current_rp_time_string()
+        next_update_time_str = rp.get_time_to_next_increment_string()
+
+        message = (
+            f"Current time in Sagrea is {curr_time_str}.\n"
+            + f"-# *Next update is in {next_update_time_str}*"
+        )
+        await ctx.send(message)
+
+    # example
     # @commands.command()
     # async def test(self, ctx, member: commands.MemberConverter, *, reason=None):
     #     # await ctx.guild.ban(member, reason=reason)
     #     # await ctx.send(f'{member} has been banned.')
     #     pass
 
+    # @commands.command()
+    # async def hello(self, ctx, *, member: discord.Member = None):
+    #     """Says hello"""
+    #     member = member or ctx.author
+    #     await ctx.send(f"Hello {member.name}~")
 
+
+# required global function for bot.load_extension()
 def setup(bot):
     bot.add_cog(Rp(bot))
 
@@ -31,7 +59,7 @@ class RpHandler:
     def __init__(
         self,
         name: str,
-        guilds: List[CidderGuild],
+        guilds: List[discord.Guild],
         rp_datetime_unit: TimeUnit,
         rp_datetime: datetime,
         rp_datetime_increment_amount: int,
@@ -64,7 +92,7 @@ class RpHandler:
 
         logging.info(
             f"{self} has been updated from {convert_time_unit_string(prev_rp_dt, self.rp_datetime_unit)} "
-            + f"to {self.current_rp_time_string()}. "
+            + f"to {self.get_current_rp_time_string()}. "
             + f"Next update is in {self.get_time_to_next_increment_string()}."
         )
 
@@ -76,7 +104,7 @@ class RpHandler:
 
         return initial + unit.value
 
-    def current_rp_time_string(self) -> str:
+    def get_current_rp_time_string(self) -> str:
         """Gets the current in-RP time as a formatted string, based on the unit used for the RP.
 
         Returns:
