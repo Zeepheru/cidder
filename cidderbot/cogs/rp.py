@@ -21,15 +21,8 @@ class Rp(commands.Cog):
         self.bot = bot
         self.cidder = cidder
 
-    async def initialize(self):
-        """Asynchronous initializations required for Rp."""
-        # load scheduling events for all RPs
         for rp in self.cidder.rps:
-            await self.update_rp_regular_task(rp)
-
-    def _get_rp(self, ctx) -> "RpHandler":
-        # very advanced code :+1:
-        return self.cidder.get_rps_for_guild(ctx.guild)[0]
+            self.bot.loop.create_task(self.update_rp_regular_task(rp))
 
     @commands.command()
     async def date(self, ctx):
@@ -39,7 +32,7 @@ class Rp(commands.Cog):
         next_update_time_str = rp.format_time_to_next_increment()
 
         message = (
-            f"Current time in Sagrea is {curr_time_str}.\n"
+            f"Current date in Sagrea is {curr_time_str}.\n"
             + f"-# *Next update is in {next_update_time_str}*"
         )
         await ctx.send(message)
@@ -60,18 +53,15 @@ class Rp(commands.Cog):
 
         await ctx.send(message)
 
-    # example
-    # @commands.command()
-    # async def test(self, ctx, member: commands.MemberConverter, *, reason=None):
-    #     # await ctx.guild.ban(member, reason=reason)
-    #     # await ctx.send(f'{member} has been banned.')
-    #     pass
+    async def initialize(self):
+        """Asynchronous initializations required for Rp."""
+        # load scheduling events for all RPs
+        for rp in self.cidder.rps:
+            await self.update_rp_regular_task(rp)
 
-    # @commands.command()
-    # async def hello(self, ctx, *, member: discord.Member = None):
-    #     """Says hello"""
-    #     member = member or ctx.author
-    #     await ctx.send(f"Hello {member.name}~")
+    def _get_rp(self, ctx) -> "RpHandler":
+        # very advanced code :+1:
+        return self.cidder.get_rps_for_guild(ctx.guild)[0]
 
     async def update_rp(self, rp: "RpHandler") -> bool:
         """Updates the RP by incrementing the date,
