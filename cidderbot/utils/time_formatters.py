@@ -42,6 +42,8 @@ def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
 
 def format_timedelta(td: timedelta) -> str:
     # Deepseek R1 :)
+    part_length_limit = 4
+
     # Extract days, seconds, and microseconds from the timedelta
     total_seconds = int(td.total_seconds())
     days, remainder = divmod(total_seconds, 86400)
@@ -76,6 +78,7 @@ def format_timedelta(td: timedelta) -> str:
     elif len(parts) == 1:
         return parts[0]
     else:
+        parts = parts[:part_length_limit]
         return ", ".join(parts[:-1]) + f" and {parts[-1]}"
 
 
