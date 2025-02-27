@@ -54,7 +54,10 @@ class BotEvents:
             cidder.initialize(guilds, channels, users)
 
             # load cogs
-            await self.bot.add_cog(rp.Rp(self.bot, cidder))
+            rp_cog = rp.Rp(self.bot, cidder)
+            await rp_cog.initialize()
+            self.bot.add_cog(rp_cog)
+
             logging.info("Cog loading complete.")
             logging.info("[SUCCESS] CiDder loading complete.")
 

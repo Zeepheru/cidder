@@ -21,9 +21,11 @@ class Rp(commands.Cog):
         self.bot = bot
         self.cidder = cidder
 
+    async def initialize(self):
+        """Asynchronous initializations required for Rp."""
         # load scheduling events for all RPs
         for rp in self.cidder.rps:
-            self.update_rp_regular_task(rp)
+            await self.update_rp_regular_task(rp)
 
     def _get_rp(self, ctx) -> "RpHandler":
         # very advanced code :+1:
@@ -71,16 +73,20 @@ class Rp(commands.Cog):
     #     member = member or ctx.author
     #     await ctx.send(f"Hello {member.name}~")
 
-    def update_rp(self, rp: "RpHandler"):
-        """Updates the RP (increments), and sends a message to the update channel id specified in the rp instance.
+    def update_rp(self, rp: "RpHandler") -> bool:
+        """Updates the RP by incrementing the date,
+        and sends a message to the update channel id specified in the rp instance.
 
         Args:
             rp (RpHandler): rp instance to be updated.
+
+        Returns:
+            bool: Success: True; Failure: False
         """
 
         if not rp.channel_id:
             logging.warning("%s: invalid channel id. Update cancelled.", rp)
-            return
+            return False
         channel = self.bot.get_channel(rp.channel_id)
 
         if not channel:
@@ -89,7 +95,7 @@ class Rp(commands.Cog):
                 rp,
                 rp.channel_id,
             )
-            return
+            return False
 
         # update
         rp.update()
@@ -97,6 +103,8 @@ class Rp(commands.Cog):
         # send message
         message = f"Time in {rp.name} is now {rp.format_current_rp_time_string()}."
         channel.send(message)
+
+        return True
 
     async def update_rp_regular_task(self, rp: "RpHandler"):
         await self.bot.wait_until_ready()
@@ -108,11 +116,11 @@ class Rp(commands.Cog):
             rp.format_time_to_next_increment(),
         )
         time_till_next_update = rp.get_time_to_next_increment()
-        asyncio.sleep(time_till_next_update.seconds())
+        asyncio.sleep(time_till_next_update.total_seconds())
         self.update_rp(rp)
 
         while not self.bot.is_closed():
-            asyncio.sleep(time_till_next_update.seconds())
+            asyncio.sleep(time_till_next_update.total_seconds())
             self.update_rp(rp)
 
 
