@@ -53,7 +53,7 @@ def format_timedelta(td: timedelta) -> str:
     # Create a list of formatted strings for each unit
     parts = []
 
-    if days > 0:
+    if days > 0 and days < 7:
         parts.append(f"{days} {'day' if days == 1 else 'days'}")
 
     if hours > 0:
@@ -89,3 +89,9 @@ def main():
     print(format_timedelta(timedelta(seconds=1234)))
     print(format_timedelta(timedelta(seconds=12351)))
     print(format_timedelta(timedelta(seconds=252351)))
+    print(format_timedelta(timedelta(seconds=752351)))
+    print(format_timedelta(timedelta(seconds=1252351)))
+    print(format_timedelta(timedelta(seconds=86400 * 2)))
+    print(format_timedelta(timedelta(seconds=86400 * 6)))
+    print(format_timedelta(timedelta(seconds=86400 * 8)))
+    print(format_timedelta(timedelta(seconds=86400 * 15)))

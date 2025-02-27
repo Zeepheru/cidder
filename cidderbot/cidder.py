@@ -41,9 +41,11 @@ class Cidder:
         name = os.getenv("RP_NAME")
         rp_datetime_unit = os.getenv("RP_DT_UNIT")
         rp_datetime_string = os.getenv("RP_DT_ISOSTRING")
-        rp_datetime_increment_amount = os.getenv("RP_DT_INCR_AMT")
+        rp_datetime_increment_amount = int(os.getenv("RP_DT_INCR_AMT"))
         prev_datetime_string = os.getenv("PREV_INCR_DT_ISOSTRING")
         increment_interval_secs = int(os.getenv("INCR_INTERVAL_SECONDS"))
+
+        channel_id = int(os.getenv("CHANNEL_ID"))
 
         rp = RpHandler(
             name=name,
@@ -53,6 +55,7 @@ class Cidder:
             rp_datetime_increment_amount=rp_datetime_increment_amount,
             prev_datetime=datetime.fromisoformat(prev_datetime_string),
             increment_interval=timedelta(seconds=increment_interval_secs),
+            channel_id=channel_id,
         )
 
         self.rps.append(rp)
