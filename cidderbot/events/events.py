@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from cidderbot.cidder import Cidder
+from cidderbot.cogs import rp
 
 
 class BotEvents:
@@ -30,6 +31,8 @@ class BotEvents:
             """When the bot is ready.
 
             Also handles startup procedures for Cidder's logic.
+
+            Loads cogs.
             """
             if self.bot.user:
                 self._logger.info(
@@ -49,6 +52,11 @@ class BotEvents:
             # logging.debug(self.bot.command_prefix)
 
             cidder.initialize(guilds, channels, users)
+
+            # load cogs
+            await self.bot.add_cog(rp.Rp(self.bot, cidder))
+            logging.info("Cog loading complete.")
+            logging.info("[SUCCESS] CiDder loading complete.")
 
         @self.bot.event
         async def on_message(message: discord.Message) -> None:

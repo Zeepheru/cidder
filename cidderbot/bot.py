@@ -52,9 +52,6 @@ class BotMain:
         # load tokens and cogs
         self._load_tokens()
         self._logger.info("Token loading complete.")
-        asyncio.run(self._load_cogs())  # wait
-        # self._load_cogs()
-        self._logger.info("Cog loading complete.")
 
         # creates events, including all the important initialization (this feels very jank)
         events.BotEvents(self.bot, self.cidder)
@@ -76,15 +73,15 @@ class BotMain:
         load_dotenv()
         self._token = os.getenv(TOKEN_STRING)
 
-    async def _load_cogs(self) -> None:
-        """Loads Cogs (in `./cogs/*`) into the bot."""
+    # async def _load_cogs(self) -> None:
+    #     """Loads Cogs (in `./cogs/*`) into the bot."""
 
-        # for _, name, _ in pkgutil.iter_modules(["cidderbot.cogs"]):
-        #     logging.debug("Loading cog: %s", name)
-        #     self.bot.load_extension(f"cogs.{name}")
-        await self.bot.add_cog(rp.Rp(self.bot, self.cidder))
+    #     # for _, name, _ in pkgutil.iter_modules(["cidderbot.cogs"]):
+    #     #     logging.debug("Loading cog: %s", name)
+    #     #     self.bot.load_extension(f"cogs.{name}")
+    #     await self.bot.add_cog(rp.Rp(self.bot, self.cidder))
 
-        # rp.Rp(self.bot, self.cidder)
+    #     # rp.Rp(self.bot, self.cidder)
 
 
 def main():
