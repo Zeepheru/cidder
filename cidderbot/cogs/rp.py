@@ -1,4 +1,5 @@
 import logging
+import math
 from datetime import datetime, timedelta
 from typing import List
 
@@ -18,8 +19,6 @@ class Rp(commands.Cog):
     def __init__(self, bot: commands.Bot, cidder):
         self.bot = bot
         self.cidder = cidder
-
-        logging.info("[COG] loaded RP cog")
 
     @commands.command()
     async def date(self, ctx):
@@ -75,8 +74,24 @@ class RpHandler:
         self.next_incr_datetime = prev_datetime + increment_interval
         self.incr_interval = increment_interval
 
+        self._update_date_to_current()
+
     def __repr__(self) -> str:
         return f"<RP: {self.name}>"
+
+    def _update_date_to_current(self) -> None:
+        """Updates the date of the rp to the correct current date based on how many update cycles may have passed
+        since the loaded start time.
+
+        Accounts for incorrect start times.
+        """
+        duration_since_start = datetime.now() - self.prev_incr_datetime
+        if duration_since_start < self.incr_interval:
+            return
+
+        update_count = math.floor(duration_since_start / self.incr_interval)
+
+        self.rp_datetime += update_count * self.incr_interval
 
     def update(self) -> None:
         """Updates the in-universe and real dates of this RP instance."""
