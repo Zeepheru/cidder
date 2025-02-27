@@ -73,7 +73,7 @@ class Rp(commands.Cog):
     #     member = member or ctx.author
     #     await ctx.send(f"Hello {member.name}~")
 
-    def update_rp(self, rp: "RpHandler") -> bool:
+    async def update_rp(self, rp: "RpHandler") -> bool:
         """Updates the RP by incrementing the date,
         and sends a message to the update channel id specified in the rp instance.
 
@@ -102,7 +102,7 @@ class Rp(commands.Cog):
 
         # send message
         message = f"Time in {rp.name} is now {rp.format_current_rp_time_string()}."
-        channel.send(message)
+        await channel.send(message)
 
         return True
 
@@ -116,12 +116,12 @@ class Rp(commands.Cog):
             rp.format_time_to_next_increment(),
         )
         time_till_next_update = rp.get_time_to_next_increment()
-        asyncio.sleep(time_till_next_update.total_seconds())
-        self.update_rp(rp)
+        await asyncio.sleep(time_till_next_update.total_seconds())
+        await self.update_rp(rp)  # note - continues even on failure
 
         while not self.bot.is_closed():
-            asyncio.sleep(time_till_next_update.total_seconds())
-            self.update_rp(rp)
+            await asyncio.sleep(rp.incr_interval.total_seconds())
+            await self.update_rp(rp)
 
 
 # required global function for bot.load_extension()
@@ -164,6 +164,8 @@ class RpHandler:
         """Updates the date of the rp to the correct current date based on how many update cycles may have passed
         since the loaded start time.
 
+        Also updates prev and next incr_time
+
         Accounts for incorrect start times.
         """
         duration_since_start = datetime.now() - self.prev_incr_datetime
@@ -177,6 +179,10 @@ class RpHandler:
             self.rp_datetime_unit,
             update_count * self.rp_datetime_increment_amount,
         )
+
+        # update incr times
+        self.prev_incr_datetime += update_count * self.incr_interval
+        self.next_incr_datetime = self.prev_incr_datetime + self.incr_interval
 
     def update(self) -> None:
         """Updates the in-universe and real dates of this RP instance."""
@@ -207,7 +213,9 @@ class RpHandler:
         return initial + unit.value
 
     def get_time_to_next_increment(self) -> timedelta:
-        return self.next_incr_datetime - datetime.now()
+        now = datetime.now()
+        difference = self.next_incr_datetime - now
+        return difference
 
     def format_current_rp_time_string(self) -> str:
         """Gets the current in-RP time as a formatted string, based on the unit used for the RP.
