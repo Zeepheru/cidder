@@ -24,8 +24,27 @@ class Rp(commands.Cog):
         for rp in self.cidder.rps:
             self.bot.loop.create_task(self.update_rp_regular_task(rp))
 
+    # @commands.command()
+    # async def help(self, ctx):
+    #     """Command: rp!help
+
+    #     Shows a list of commands available.
+    #     """
+
+    #     help_message = "\n".join(
+    #         [
+    #             "### Commands available for `Cidder`:",
+    #             "* `rp!help`",
+    #             "* `rp!date`",
+    #             "* `rp!info`",
+    #         ]
+    #     )
+
+    #     await ctx.send(help_message)
+
     @commands.command()
     async def date(self, ctx):
+        """Shows the current date of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
         curr_time_str = rp.format_current_rp_time_string()
@@ -39,6 +58,7 @@ class Rp(commands.Cog):
 
     @commands.command()
     async def info(self, ctx):
+        """Shows a printout of the current info of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
         value = rp.rp_datetime_increment_amount
