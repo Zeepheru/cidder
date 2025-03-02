@@ -3,6 +3,8 @@ from enum import Enum
 
 
 class TimeUnit(Enum):
+    """Standard units of time. Use `TimeUnit.value` to get the duration in seconds."""
+
     SECOND = 1
     MINUTE = 60
     HOUR = 3600
