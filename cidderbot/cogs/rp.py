@@ -122,6 +122,8 @@ def setup(bot):
 
 
 class RpHandler:
+    """Class that encapsulates an RP instance."""
+
     def __init__(
         self,
         name: str,

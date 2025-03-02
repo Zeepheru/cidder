@@ -13,11 +13,11 @@ class TimeUnit(Enum):
 
 
 def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
-    """Returns time as a formatted string, based on the unit given.
+    """Converts a `datetime.datetime` into a formatted string, based on a given unit.
 
     Args:
-        dt (datetime.datetime): _description_
-        unit (TimeUnit): _description_
+        dt (datetime.datetime): Datetime to be converted.
+        unit (TimeUnit): Unit of measurement for the date.
 
     Returns:
         str: Formatted time as a string.
@@ -40,11 +40,21 @@ def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
     return dt.strftime("%w %B %Y, %H:%M:%S")  # 1 January 1970, 12:42:00
 
 
-def format_timedelta(td: timedelta) -> str:
-    # Deepseek R1 :)
-    part_length_limit = 4
+def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
+    """Formats a `datetime.timedelta` duration into a readable string.
 
-    # Extract days, seconds, and microseconds from the timedelta
+    Args:
+        td (timedelta): Duration to be formatted.
+        length_limit (int, optional): Limit for number of components in the time string. Defaults to 3.
+
+    Returns:
+        str: Formatted string
+    """
+
+    # Deepseek R1 :) - Mostly at least
+    part_length_limit = length_limit
+
+    # Extract days, hours, minutes, seconds from the timedelta
     total_seconds = int(td.total_seconds())
     days, remainder = divmod(total_seconds, 86400)
     hours, remainder = divmod(remainder, 3600)
