@@ -31,17 +31,11 @@ Install requirements:
 pip install -r requirements.txt
 ```
 
-To run:
-
-```bash
-python3 -m cidderbot.bot
-```
-
 Create the `.env` file. Remember to use quotes `"` for strings.
+This contains the environment variables that are required.
 
 ```text
 DISCORD_TOKEN={your-bot-token}
-# Disables extra logging messages
 DEBUG_MODE=0
 
 # DB
@@ -49,4 +43,10 @@ DB_HOST={}
 DB_NAME={}
 DB_USER={}
 DB_PASSWORD={}
+```
+
+To run:
+
+```bash
+python3 -m cidderbot.bot
 ```
