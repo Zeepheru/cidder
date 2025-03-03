@@ -43,7 +43,7 @@ class Rp(commands.Cog):
         """Shows a printout of the current info of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
-        value = rp.rp_datetime_increment_amount
+        value = rp.rp_datetime_incr_amount
 
         message = (
             f"### RP info for {rp.name}:\n"
@@ -130,19 +130,19 @@ class RpHandler:
         guilds: List[discord.Guild],
         rp_datetime_unit: TimeUnit,
         rp_datetime: datetime,
-        rp_datetime_increment_amount: int,
-        prev_datetime: datetime,
-        increment_interval: timedelta,
+        rp_datetime_incr_amount: int,
+        last_datetime: datetime,
+        incr_interval: timedelta,
         channel_id: int = 0,
     ) -> None:
         self.guilds = guilds
         self.name = name
         self.rp_datetime_unit = rp_datetime_unit
         self.rp_datetime = rp_datetime
-        self.rp_datetime_increment_amount = rp_datetime_increment_amount
-        self.prev_incr_datetime = prev_datetime
-        self.next_incr_datetime = prev_datetime + increment_interval
-        self.incr_interval = increment_interval
+        self.rp_datetime_incr_amount = rp_datetime_incr_amount
+        self.prev_incr_datetime = last_datetime
+        self.next_incr_datetime = last_datetime + incr_interval
+        self.incr_interval = incr_interval
         self.channel_id = channel_id
 
         self._update_date_to_current()
@@ -171,7 +171,7 @@ class RpHandler:
         self.rp_datetime = self.increment(
             self.rp_datetime,
             self.rp_datetime_unit,
-            update_count * self.rp_datetime_increment_amount,
+            update_count * self.rp_datetime_incr_amount,
         )
 
         # update incr times
@@ -184,7 +184,7 @@ class RpHandler:
         self.rp_datetime = self.increment(
             self.rp_datetime,
             self.rp_datetime_unit,
-            self.rp_datetime_increment_amount,
+            self.rp_datetime_incr_amount,
         )
 
         self.prev_incr_datetime = self.next_incr_datetime
@@ -229,7 +229,7 @@ class RpHandler:
             self.increment(
                 self.rp_datetime,
                 self.rp_datetime_unit,
-                self.rp_datetime_increment_amount,
+                self.rp_datetime_incr_amount,
             ),
             self.rp_datetime_unit,
         )
