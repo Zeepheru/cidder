@@ -51,6 +51,7 @@ class Cidder:
             name=name,
             guilds=self.guilds,
             rp_datetime_unit=TimeUnit[rp_datetime_unit],
+            rp_datetime_incr_unit=TimeUnit[rp_datetime_unit],
             rp_datetime=datetime.fromisoformat(rp_datetime_string),
             rp_datetime_incr_amount=rp_datetime_increment_amount,
             last_datetime=datetime.fromisoformat(prev_datetime_string),

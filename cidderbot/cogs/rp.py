@@ -129,15 +129,31 @@ class RpHandler:
         name: str,
         guilds: List[discord.Guild],
         rp_datetime_unit: TimeUnit,
+        rp_datetime_incr_unit: TimeUnit,
         rp_datetime: datetime,
         rp_datetime_incr_amount: int,
         last_datetime: datetime,
         incr_interval: timedelta,
         channel_id: int = 0,
     ) -> None:
+        """Creates a new RpHandler instance
+
+        Args:
+            name (str): Name of this RP.
+            guilds (List[discord.Guild]): List of Guilds (servers). Currently using `discord.Guild`, but
+            expected to change in future to own class.
+            rp_datetime_unit (TimeUnit): _description_
+            rp_datetime_incr_unit (TimeUnit): _description_
+            rp_datetime (datetime): _description_
+            rp_datetime_incr_amount (int): _description_
+            last_datetime (datetime): _description_
+            incr_interval (timedelta): _description_
+            channel_id (int, optional): _description_. Defaults to 0.
+        """
         self.guilds = guilds
         self.name = name
         self.rp_datetime_unit = rp_datetime_unit
+        self.rp_datetime_incr_unit = rp_datetime_incr_unit
         self.rp_datetime = rp_datetime
         self.rp_datetime_incr_amount = rp_datetime_incr_amount
         self.prev_incr_datetime = last_datetime
