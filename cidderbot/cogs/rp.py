@@ -77,6 +77,7 @@ class Rp(commands.Cog):
         """
 
         if not rp.channel_id:
+            # TODO: this should continue to update, just without sending an update message
             logging.warning("%s: invalid channel id. Update cancelled.", rp)
             return False
         channel = self.bot.get_channel(rp.channel_id)
@@ -136,19 +137,23 @@ class RpHandler:
         incr_interval: timedelta,
         channel_id: int = 0,
     ) -> None:
-        """Creates a new RpHandler instance
+        """Creates a new RpHandler instance to wrap an RP.
+
+        #TODO: in future this will probably only handle date information.
 
         Args:
             name (str): Name of this RP.
-            guilds (List[discord.Guild]): List of Guilds (servers). Currently using `discord.Guild`, but
-            expected to change in future to own class.
-            rp_datetime_unit (TimeUnit): _description_
-            rp_datetime_incr_unit (TimeUnit): _description_
-            rp_datetime (datetime): _description_
-            rp_datetime_incr_amount (int): _description_
-            last_datetime (datetime): _description_
-            incr_interval (timedelta): _description_
-            channel_id (int, optional): _description_. Defaults to 0.
+            guilds (List[discord.Guild]): List of Guilds (servers). Currently using `discord.Guild`,
+                but expected to change in future to own class.
+            rp_datetime_unit (TimeUnit): Smallest unit to be tracked and displayed in this RP.
+            rp_datetime (datetime): Current RP date/time.
+            rp_datetime_incr_amount (int): Amount to be used for regular RP date/time increments.
+            rp_datetime_incr_unit (TimeUnit): Unit to be used for regular RP date/time increments.
+            last_datetime (datetime): Last real-life date/time that the RP was incremented on.
+            incr_interval (timedelta): Real-life time interval between RP date/time increments.
+            channel_id (int, optional): Channel id to send RP date/time increment messages to.
+                Defaults to 0, which disables update messages.
+                #TODO: this should be a list of channels.
         """
         self.guilds = guilds
         self.name = name
@@ -161,6 +166,7 @@ class RpHandler:
         self.incr_interval = incr_interval
         self.channel_id = channel_id
 
+        # loaded parameters may be out of date
         self._update_date_to_current()
 
         logging.info(
