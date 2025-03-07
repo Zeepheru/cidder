@@ -265,7 +265,11 @@ class RpHandler:
             new = initial.replace(year=value + initial.year)
             return new
         elif unit == TimeUnit.MONTH:
-            return initial.replace(month=value + initial.month)
+            years, months = divmod(value, 12)
+            return initial.replace(
+                year=years + initial.year,
+                month=months + initial.month,
+            )
 
         return initial + unit.value
 
