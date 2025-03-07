@@ -40,6 +40,7 @@ class Cidder:
         # load env vars (temp solution trust)
         name = os.getenv("RP_NAME")
         rp_datetime_unit = os.getenv("RP_DT_UNIT")
+        rp_datetime_incr_unit = os.getenv("RP_DT_INCR_UNIT")
         rp_datetime_string = os.getenv("RP_DT_ISOSTRING")
         rp_datetime_increment_amount = int(os.getenv("RP_DT_INCR_AMT"))
         prev_datetime_string = os.getenv("PREV_INCR_DT_ISOSTRING")
@@ -51,7 +52,7 @@ class Cidder:
             name=name,
             guilds=self.guilds,
             rp_datetime_unit=TimeUnit[rp_datetime_unit],
-            rp_datetime_incr_unit=TimeUnit[rp_datetime_unit],
+            rp_datetime_incr_unit=TimeUnit[rp_datetime_incr_unit],
             rp_datetime=datetime.fromisoformat(rp_datetime_string),
             rp_datetime_incr_amount=rp_datetime_increment_amount,
             last_datetime=datetime.fromisoformat(prev_datetime_string),
