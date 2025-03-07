@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 import discord
@@ -235,7 +235,7 @@ class RpHandler:
 
         Accounts for incorrect start times.
         """
-        duration_since_start = datetime.now() - self.prev_incr_datetime
+        duration_since_start = datetime.now(timezone.utc) - self.prev_incr_datetime
         if duration_since_start < self.incr_interval:
             return
 
@@ -308,7 +308,7 @@ class RpHandler:
 
     @property
     def next_unit_datetime(self) -> datetime:
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         time_since_incr = now - self.prev_incr_datetime
         fraction_elapsed = time_since_incr / self.incr_interval
 
@@ -327,7 +327,7 @@ class RpHandler:
         Returns:
             timedelta: Time until the next increment.
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         difference = self.next_incr_datetime - now
         return difference
 
@@ -337,7 +337,7 @@ class RpHandler:
         Returns:
             timedelta: Time until the next RP time.
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         time_to_next_unit_time = self.next_unit_datetime - now
 
         return time_to_next_unit_time
@@ -348,7 +348,7 @@ class RpHandler:
         Returns:
             datetime: Current RP unit time.
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         time_since_incr = now - self.prev_incr_datetime
         fraction_elapsed = time_since_incr / self.incr_interval
 
@@ -368,7 +368,7 @@ class RpHandler:
         Returns:
             datetime: Next RP unit time.
         """
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         time_since_incr = now - self.prev_incr_datetime
         fraction_elapsed = time_since_incr / self.incr_interval
 

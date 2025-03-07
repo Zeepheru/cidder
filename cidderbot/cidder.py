@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 import discord
@@ -48,14 +48,22 @@ class Cidder:
 
         channel_id = int(os.getenv("CHANNEL_ID"))
 
+        # convert datetimes first
+        rp_datetime = datetime.fromisoformat(rp_datetime_string).replace(
+            tzinfo=timezone.utc
+        )
+        rp_last_datetime = datetime.fromisoformat(prev_datetime_string).replace(
+            tzinfo=timezone.utc
+        )
+
         rp = RpHandler(
             name=name,
             guilds=self.guilds,
             rp_datetime_unit=TimeUnit[rp_datetime_unit],
             rp_datetime_incr_unit=TimeUnit[rp_datetime_incr_unit],
-            rp_datetime=datetime.fromisoformat(rp_datetime_string),
+            rp_datetime=rp_datetime,
             rp_datetime_incr_amount=rp_datetime_increment_amount,
-            last_datetime=datetime.fromisoformat(prev_datetime_string),
+            last_datetime=rp_last_datetime,
             incr_interval=timedelta(seconds=increment_interval_secs),
             channel_id=channel_id,
         )
