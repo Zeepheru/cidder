@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 
@@ -69,6 +69,11 @@ def get_time_unit_mapping(time_unit_a: TimeUnit, time_unit_b: TimeUnit) -> int:
         return 1
 
     return TIMEUNIT_MAPPING[time_unit_a][time_unit_b]
+
+
+def convert_datetime_to_utc_timestamp(dt: datetime) -> float:
+    # return dt.replace(tzinfo=timezone.utc).timestamp() # idk this is bugged
+    return dt.timestamp()
 
 
 def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
