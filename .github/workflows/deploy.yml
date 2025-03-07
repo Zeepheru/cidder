@@ -3,7 +3,7 @@ name: Deploy to DigitalOcean Droplet VM
 on:
   push:
     branches:
-      - prod  # Trigger deployment on push to the 'prod' branch
+      - main  # Trigger deployment on push to the 'main' branch
 
 jobs:
   deploy:
