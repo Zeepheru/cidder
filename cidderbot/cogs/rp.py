@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 import discord
@@ -9,57 +9,107 @@ from discord.ext import commands
 
 from cidderbot.utils.time_formatters import (
     TimeUnit,
+    convert_datetime_to_utc_timestamp,
     convert_time_unit_string,
     format_timedelta,
+    get_time_unit_mapping,
 )
 
 
 # I can't type annotate cidder because of circular imports. Must mean this whole thing is incredibly jank.
 # And there probably is a "correct" way I can't be arsed to figure out.
 class Rp(commands.Cog):
-    def __init__(self, bot: commands.Bot, cidder):
+
+    def __init__(self, bot: commands.Bot, cidder: "cidderbot.cidder.Cidder"):
         self.bot = bot
         self.cidder = cidder
 
         for rp in self.cidder.rps:
             self.bot.loop.create_task(self.update_rp_regular_task(rp))
 
+    # ====================== Commands START =======================================
+
     @commands.command()
-    async def date(self, ctx):
+    async def date(self, ctx: commands.Context):
+        """Shows the current date of the RP.
+
+        Example:
+        The current date in <TheRP> is Jan 1970.
+        Next year is in 1 day and 2 hours.
+        """
         rp: RpHandler = self._get_rp(ctx)
 
-        curr_time_str = rp.format_current_rp_time_string()
-        next_update_time_str = rp.format_time_to_next_increment()
+        curr_time_str = rp.format_current_rp_time()
+        next_update_time_str = rp.format_time_to_next_incr()
 
-        message = (
-            f"Current date in Sagrea is {curr_time_str}.\n"
-            + f"-# *Next update is in {next_update_time_str}*"
-        )
+        # TODO this currently won't display an increment values - i.e. only shows Next year instead of Next 2 years.
+        messsage_list = [
+            f"Current date in Sagrea is {curr_time_str}.",
+            f"-# *Next {rp.rp_datetime_incr_unit.name.lower()} is in {next_update_time_str}*",
+        ]
+
+        message = "\n".join(messsage_list)
+
         await ctx.send(message)
 
     @commands.command()
-    async def info(self, ctx):
+    async def info(self, ctx: commands.Context):
+        """Shows a printout of the current info of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
-        value = rp.rp_datetime_increment_amount
+        message_list = [
+            f"### RP info for {rp.name}:",
+            f"It is currently {rp.format_current_rp_time()}.",
+            f"Updates every {format_timedelta(rp.incr_interval)}.",
+            "",
+        ]
 
-        message = (
-            f"### RP info for {rp.name}:\n"
-            + f"Current date: {rp.format_current_rp_time_string()}\n"
-            + f"Update frequency: {format_timedelta(rp.incr_interval)}\n"
-            + f"Next update: {value} {rp.rp_datetime_unit.name.lower()}{"" if value == 1 else "s"} "
-            + f"to {rp.format_next_rp_time()}, in {rp.format_time_to_next_increment()}"
+        # Now add "It will be X rp datetime in Y duration"
+        # If both incr_unit and unit are the same, only include one
+
+        # add unit first cuz assumed to be smaller.
+        next_unit_utc_timestamp = int(
+            convert_datetime_to_utc_timestamp(rp.next_unit_datetime)
         )
+        message_list += [
+            f"It will be {rp.format_next_rp_time()} <t:{next_unit_utc_timestamp}:R>.",
+        ]
+
+        if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
+            # if different add the increment unit display separately.
+            next_incr_utc_timestamp = int(
+                convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
+            )
+            message_list += [
+                f"It will be {rp.format_next_rp_incr_time()} <t:{next_incr_utc_timestamp}:R>.",
+            ]
+
+        message = "\n".join(message_list)
 
         await ctx.send(message)
 
-    async def initialize(self):
+    # @commands.command()
+    # async def test(self, ctx: commands.Context):
+    #     rp: RpHandler = self._get_rp(ctx=ctx)
+
+    #     # message = "%s\n%s\n%s\n%s"
+    #     message = "TEST."
+    #     print(rp.num_units_in_incr)
+    #     print(rp.get_current_rp_unit_time())
+    #     print(rp.format_time_to_next_incr())
+    #     print(rp.get_time_to_next_rp_unit())
+
+    #     await ctx.send(message)
+
+    # ====================== Commands END =======================================
+
+    async def initialize(self) -> None:
         """Asynchronous initializations required for Rp."""
         # load scheduling events for all RPs
         for rp in self.cidder.rps:
             await self.update_rp_regular_task(rp)
 
-    def _get_rp(self, ctx) -> "RpHandler":
+    def _get_rp(self, ctx: commands.Context) -> "RpHandler":
         # very advanced code :+1:
         return self.cidder.get_rps_for_guild(ctx.guild)[0]
 
@@ -75,6 +125,7 @@ class Rp(commands.Cog):
         """
 
         if not rp.channel_id:
+            # TODO: this should continue to update, just without sending an update message
             logging.warning("%s: invalid channel id. Update cancelled.", rp)
             return False
         channel = self.bot.get_channel(rp.channel_id)
@@ -91,7 +142,7 @@ class Rp(commands.Cog):
         rp.update()
 
         # send message
-        message = f"Time in {rp.name} is now {rp.format_current_rp_time_string()}."
+        message = f"Time in {rp.name} is now {rp.format_current_rp_time()}."
         await channel.send(message)
 
         return True
@@ -103,9 +154,9 @@ class Rp(commands.Cog):
         logging.info(
             "%s: Next Update event is scheduled in: %s",
             rp,
-            rp.format_time_to_next_increment(),
+            rp.format_time_to_next_incr(),
         )
-        time_till_next_update = rp.get_time_to_next_increment()
+        time_till_next_update = rp.get_time_to_next_incr()
         await asyncio.sleep(time_till_next_update.total_seconds())
         await self.update_rp(rp)  # note - continues even on failure
 
@@ -120,32 +171,58 @@ def setup(bot):
 
 
 class RpHandler:
+    """Class that encapsulates an RP instance."""
+
     def __init__(
         self,
         name: str,
         guilds: List[discord.Guild],
         rp_datetime_unit: TimeUnit,
+        rp_datetime_incr_unit: TimeUnit,
         rp_datetime: datetime,
-        rp_datetime_increment_amount: int,
-        prev_datetime: datetime,
-        increment_interval: timedelta,
+        rp_datetime_incr_amount: int,
+        last_datetime: datetime,
+        incr_interval: timedelta,
         channel_id: int = 0,
     ) -> None:
+        """Creates a new RpHandler instance to wrap an RP.
+
+        #TODO: in future this will probably only handle date information.
+
+        Args:
+            name (str): Name of this RP.
+            guilds (List[discord.Guild]): List of Guilds (servers). Currently using `discord.Guild`,
+                but expected to change in future to own class.
+            rp_datetime_unit (TimeUnit): Smallest unit to be tracked and displayed in this RP.
+            rp_datetime (datetime): Current RP date/time.
+            rp_datetime_incr_amount (int): Amount to be used for regular RP date/time increments.
+            rp_datetime_incr_unit (TimeUnit): Unit to be used for regular RP date/time increments.
+            last_datetime (datetime): Last real-life date/time that the RP was incremented on.
+            incr_interval (timedelta): Real-life time interval between RP date/time increments.
+            channel_id (int, optional): Channel id to send RP date/time increment messages to.
+                Defaults to 0, which disables update messages.
+                #TODO: this should be a list of channels.
+        """
         self.guilds = guilds
         self.name = name
         self.rp_datetime_unit = rp_datetime_unit
+        self.rp_datetime_incr_unit = rp_datetime_incr_unit
         self.rp_datetime = rp_datetime
-        self.rp_datetime_increment_amount = rp_datetime_increment_amount
-        self.prev_incr_datetime = prev_datetime
-        self.next_incr_datetime = prev_datetime + increment_interval
-        self.incr_interval = increment_interval
+        self.rp_datetime_incr_amount = rp_datetime_incr_amount
+        self.prev_incr_datetime = last_datetime
+        self.next_incr_datetime = last_datetime + incr_interval
+        self.incr_interval = incr_interval
         self.channel_id = channel_id
 
+        # number of units in an increment interval
+        self.num_units_in_incr = rp_datetime_incr_amount * get_time_unit_mapping(
+            self.rp_datetime_incr_unit, rp_datetime_unit
+        )
+
+        # loaded parameters may be out of date, so update them to current.
         self._update_date_to_current()
 
-        logging.info(
-            "%s loaded. Current time: %s", self, self.format_current_rp_time_string()
-        )
+        logging.info("%s loaded. Current time: %s", self, self.format_current_rp_time())
 
     def __repr__(self) -> str:
         return f"<RP: {self.name}>"
@@ -158,16 +235,16 @@ class RpHandler:
 
         Accounts for incorrect start times.
         """
-        duration_since_start = datetime.now() - self.prev_incr_datetime
+        duration_since_start = datetime.now(timezone.utc) - self.prev_incr_datetime
         if duration_since_start < self.incr_interval:
             return
 
         update_count = math.floor(duration_since_start / self.incr_interval)
 
-        self.rp_datetime = self.increment(
+        self.rp_datetime = self.add_to_datetime(
             self.rp_datetime,
-            self.rp_datetime_unit,
-            update_count * self.rp_datetime_increment_amount,
+            self.rp_datetime_incr_unit,
+            update_count * self.rp_datetime_incr_amount,
         )
 
         # update incr times
@@ -177,64 +254,186 @@ class RpHandler:
     def update(self) -> None:
         """Updates the in-universe and real dates of this RP instance."""
         prev_rp_dt = self.rp_datetime
-        self.rp_datetime = self.increment(
+        self.rp_datetime = self.add_to_datetime(
             self.rp_datetime,
-            self.rp_datetime_unit,
-            self.rp_datetime_increment_amount,
+            self.rp_datetime_incr_unit,
+            self.rp_datetime_incr_amount,
         )
 
         self.prev_incr_datetime = self.next_incr_datetime
         self.next_incr_datetime += self.incr_interval
 
         logging.info(
-            f"{self} has been updated from {convert_time_unit_string(prev_rp_dt, self.rp_datetime_unit)} "
-            + f"to {self.format_current_rp_time_string()}. "
-            + f"Next update is in {self.format_time_to_next_increment()}."
+            "%s has been updated from %s to %s. Next update is in %s.",
+            self,
+            convert_time_unit_string(prev_rp_dt, self.rp_datetime_incr_unit),
+            self.format_current_rp_time(),
+            self.format_time_to_next_incr(),
         )
 
-    def increment(self, initial: datetime, unit: TimeUnit, value: int) -> datetime:
+    def add_to_datetime(
+        self, initial: datetime, unit: TimeUnit, value: int
+    ) -> datetime:
+        """Add a given datetime by an amount value * unit.
+
+        Args:
+            initial (datetime): Initial datetime to add to.
+            unit (TimeUnit): Unit of time.
+            value (int): Amount of unit to add by. Accepts positive integer values only.
+
+        Returns:
+            datetime: Added datetime.
+        """
+        # negative check
+        if value < 0:
+            logging.warning("Tried to add a negative value %s. Not allowed.", value)
+            return initial
+
+        # Month and year need this kinda code to add, otherwise not necessary.
+        # Saying this is going to bite me in the ass because I think I missed out leap years' days.
         if unit == TimeUnit.YEAR:
-            temp = value + initial.year
+            # temp = value + initial.year
             new = initial.replace(year=value + initial.year)
             return new
         elif unit == TimeUnit.MONTH:
-            return initial.replace(month=value + initial.month)
+            years, months = divmod(value, 12)
+            return initial.replace(
+                year=years + initial.year,
+                month=months + initial.month,
+            )
 
         return initial + unit.value
 
-    def get_time_to_next_increment(self) -> timedelta:
-        now = datetime.now()
+    # ================================ Time GETTERS =============================================
+
+    @property
+    def next_unit_datetime(self) -> datetime:
+        now = datetime.now(timezone.utc)
+        time_since_incr = now - self.prev_incr_datetime
+        fraction_elapsed = time_since_incr / self.incr_interval
+
+        num_units_next_unit_time = math.ceil(fraction_elapsed * self.num_units_in_incr)
+
+        # These are some variable names.
+        next_unit_time_irl_time_from_last_incr = (
+            num_units_next_unit_time / self.num_units_in_incr * self.incr_interval
+        )
+
+        return next_unit_time_irl_time_from_last_incr + self.prev_incr_datetime
+
+    def get_time_to_next_incr(self) -> timedelta:
+        """Gets the real-life time until the next increment is scheduled.
+
+        Returns:
+            timedelta: Time until the next increment.
+        """
+        now = datetime.now(timezone.utc)
         difference = self.next_incr_datetime - now
         return difference
 
-    def format_current_rp_time_string(self) -> str:
-        """Gets the current in-RP time as a formatted string, based on the unit used for the RP.
+    def get_time_to_next_rp_unit(self) -> timedelta:
+        """Gets the time until the next RP time based on the specified precision unit.
+
+        Returns:
+            timedelta: Time until the next RP time.
+        """
+        now = datetime.now(timezone.utc)
+        time_to_next_unit_time = self.next_unit_datetime - now
+
+        return time_to_next_unit_time
+
+    def get_current_rp_unit_time(self) -> datetime:
+        """Gets the current RP time, precision is the unit specified in the RP parameters.
+
+        Returns:
+            datetime: Current RP unit time.
+        """
+        now = datetime.now(timezone.utc)
+        time_since_incr = now - self.prev_incr_datetime
+        fraction_elapsed = time_since_incr / self.incr_interval
+
+        num_units_elapsed = math.floor(fraction_elapsed * self.num_units_in_incr)
+
+        new_dt = self.add_to_datetime(
+            initial=self.rp_datetime,
+            unit=self.rp_datetime_unit,
+            value=num_units_elapsed,
+        )
+
+        return new_dt
+
+    def get_next_rp_unit_time(self) -> datetime:
+        """Gets the next RP time, precision is the unit specified in the RP parameters.
+
+        Returns:
+            datetime: Next RP unit time.
+        """
+        now = datetime.now(timezone.utc)
+        time_since_incr = now - self.prev_incr_datetime
+        fraction_elapsed = time_since_incr / self.incr_interval
+
+        num_units_elapsed_next = math.ceil(fraction_elapsed * self.num_units_in_incr)
+
+        new_dt = self.add_to_datetime(
+            initial=self.rp_datetime,
+            unit=self.rp_datetime_unit,
+            value=num_units_elapsed_next,
+        )
+
+        return new_dt
+
+    # ================================ FORMATTED RETURNS =================================
+
+    def format_current_rp_time(self) -> str:
+        """Formats the current in-RP time, based on the unit used for the RP.
 
         Returns:
             str: Formatted time as a string.
         """
-        return convert_time_unit_string(self.rp_datetime, self.rp_datetime_unit)
-
-    def format_next_rp_time(self) -> str:
-        """Gets the in-RP time as of the next updated as a formatted string, based on the unit used for the RP.
-
-        Returns:
-            str: Formatted next update time as a string.
-        """
         return convert_time_unit_string(
-            self.increment(
-                self.rp_datetime,
-                self.rp_datetime_unit,
-                self.rp_datetime_increment_amount,
-            ),
-            self.rp_datetime_unit,
+            self.get_current_rp_unit_time(), self.rp_datetime_unit
         )
 
-    def format_time_to_next_increment(self) -> str:
-        """Gets the real-life duration to the next increment as a formatted string.
+    def format_current_rp_incr_time(self) -> str:
+        """Formats the current in-RP time, based on the increment unit used for the RP.
+
+        Returns:
+            str: Formatted time as a string.
+        """
+        return convert_time_unit_string(
+            self.get_current_rp_unit_time(), self.rp_datetime_incr_unit
+        )
+
+    def format_next_rp_time(self) -> str:
+        """Formats the in-RP time as of the next increment, based on the unit used for the RP.
+
+        Returns:
+            str: Formatted next unit time as a string.
+        """
+        return convert_time_unit_string(
+            self.get_next_rp_unit_time(), self.rp_datetime_unit
+        )
+
+    def format_next_rp_incr_time(self) -> str:
+        """Formats the in-RP time as of the next increment, based on the increment unit used for the RP.
+
+        Returns:
+            str: Formatted next increment time as a string.
+        """
+        return convert_time_unit_string(
+            dt=self.add_to_datetime(
+                initial=self.rp_datetime,
+                unit=self.rp_datetime_incr_unit,
+                value=self.rp_datetime_incr_amount,
+            ),
+            unit=self.rp_datetime_incr_unit,
+        )
+
+    def format_time_to_next_incr(self) -> str:
+        """Formats the real-life duration to the next increment
 
         Returns:
             str: Formatted duration to next increment.
         """
 
-        return format_timedelta(self.get_time_to_next_increment())
+        return format_timedelta(self.get_time_to_next_incr())

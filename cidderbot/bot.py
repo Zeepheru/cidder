@@ -15,12 +15,15 @@ from cidderbot.utils.logging_utils import log_config
 # should move to a constants file
 TOKEN_STRING = "DISCORD_TOKEN"
 DEBUG_MODE_STRING = "DEBUG_MODE"
-COMMAND_PREFIX = "rp!"
+COMMAND_PREFIX = "rp!"  # ok to define this here?
 # INTENTS_INTEGER = 182272
 
 
 class BotMain:
-    """Class used to handle bot startup."""
+    """Class used to handle bot startup.
+
+    As the end of BotMain::__init__ is a blocking call to bot.run(),
+    proper management for the bot is handled in the Cidder class."""
 
     _logger: logging.Logger
 
@@ -62,6 +65,11 @@ class BotMain:
         )
 
     def _setup_intents(self) -> discord.Intents:
+        """Sets up Discord intents. Uses the default set of intents, plus `message_content`.
+
+        Returns:
+            discord.Intents: Correctly set up intents
+        """
         intents = discord.Intents.default()
         intents.message_content = True
 

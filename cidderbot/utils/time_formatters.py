@@ -1,8 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 
 class TimeUnit(Enum):
+    """Standard units of time. Use `TimeUnit.value` to get the duration in seconds."""
+
     SECOND = 1
     MINUTE = 60
     HOUR = 3600
@@ -12,12 +14,74 @@ class TimeUnit(Enum):
     YEAR = 31536000  # 365 days
 
 
-def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
-    """Returns time as a formatted string, based on the unit given.
+TIMEUNIT_MAPPING = {
+    TimeUnit.YEAR: {
+        TimeUnit.MONTH: 12,
+        TimeUnit.WEEK: 52,
+        TimeUnit.DAY: 365,
+        TimeUnit.HOUR: 365 * 24,
+        TimeUnit.MINUTE: 365 * 24 * 60,
+        TimeUnit.SECOND: 365 * 24 * 60 * 60,
+    },
+    TimeUnit.MONTH: {
+        TimeUnit.WEEK: 4,
+        TimeUnit.DAY: 30,
+        TimeUnit.HOUR: 30 * 24,
+        TimeUnit.MINUTE: 30 * 24 * 60,
+        TimeUnit.SECOND: 30 * 24 * 60 * 60,
+    },
+    TimeUnit.WEEK: {
+        TimeUnit.DAY: 7,
+        TimeUnit.HOUR: 7 * 24,
+        TimeUnit.MINUTE: 7 * 24 * 60,
+        TimeUnit.SECOND: 7 * 24 * 60 * 60,
+    },
+    TimeUnit.DAY: {
+        TimeUnit.HOUR: 24,
+        TimeUnit.MINUTE: 24 * 60,
+        TimeUnit.SECOND: 24 * 60 * 60,
+    },
+    TimeUnit.HOUR: {
+        TimeUnit.MINUTE: 60,
+        TimeUnit.SECOND: 60 * 60,
+    },
+    TimeUnit.MINUTE: {
+        TimeUnit.SECOND: 60,
+    },
+}
+
+
+def get_time_unit_mapping(time_unit_a: TimeUnit, time_unit_b: TimeUnit) -> int:
+    """Returns an integer n where n is an approximate number of time_b in time_unit_a.
 
     Args:
-        dt (datetime.datetime): _description_
-        unit (TimeUnit): _description_
+        time_unit_a (TimeUnit): Smaller time unit.
+        time_unit_b (TimeUnit): Larger time unit.
+
+    Returns:
+        int: Approximated integer number of time_unit_b in time_unit_a.
+            Returns 0 if time_unit_a is smaller than time_unit_b.
+    """
+
+    if time_unit_a.value < time_unit_b.value:
+        return 0
+    if time_unit_a == time_unit_b:
+        return 1
+
+    return TIMEUNIT_MAPPING[time_unit_a][time_unit_b]
+
+
+def convert_datetime_to_utc_timestamp(dt: datetime) -> float:
+    # return dt.replace(tzinfo=timezone.utc).timestamp() # idk this is bugged
+    return dt.timestamp()
+
+
+def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
+    """Converts a `datetime.datetime` into a formatted string, based on a given unit.
+
+    Args:
+        dt (datetime.datetime): Datetime to be converted.
+        unit (TimeUnit): Unit of measurement for the date.
 
     Returns:
         str: Formatted time as a string.
@@ -40,11 +104,21 @@ def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
     return dt.strftime("%w %B %Y, %H:%M:%S")  # 1 January 1970, 12:42:00
 
 
-def format_timedelta(td: timedelta) -> str:
-    # Deepseek R1 :)
-    part_length_limit = 4
+def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
+    """Formats a `datetime.timedelta` duration into a readable string.
 
-    # Extract days, seconds, and microseconds from the timedelta
+    Args:
+        td (timedelta): Duration to be formatted.
+        length_limit (int, optional): Limit for number of components in the time string. Defaults to 3.
+
+    Returns:
+        str: Formatted string
+    """
+
+    # Deepseek R1 :) - Mostly at least
+    part_length_limit = length_limit
+
+    # Extract days, hours, minutes, seconds from the timedelta
     total_seconds = int(td.total_seconds())
     days, remainder = divmod(total_seconds, 86400)
     hours, remainder = divmod(remainder, 3600)
