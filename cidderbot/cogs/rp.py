@@ -253,11 +253,16 @@ class RpHandler:
         Args:
             initial (datetime): Initial datetime to add to.
             unit (TimeUnit): Unit of time.
-            value (int): Amount of unit to add by. Accepts integer values only (can be negative).
+            value (int): Amount of unit to add by. Accepts positive integer values only.
 
         Returns:
             datetime: Added datetime.
         """
+        # negative check
+        if value < 0:
+            logging.warning("Tried to add a negative value %s. Not allowed.", value)
+            return initial
+
         # Month and year need this kinda code to add, otherwise not necessary.
         # Saying this is going to bite me in the ass because I think I missed out leap years' days.
         if unit == TimeUnit.YEAR:
