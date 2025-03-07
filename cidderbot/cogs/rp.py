@@ -42,6 +42,7 @@ class Rp(commands.Cog):
         curr_time_str = rp.format_current_rp_time()
         next_update_time_str = rp.format_time_to_next_incr()
 
+        # TODO this currently won't display an increment values - i.e. only shows Next year instead of Next 2 years.
         messsage_list = [
             f"Current date in Sagrea is {curr_time_str}.",
             f"-# *Next {rp.rp_datetime_incr_unit.name.lower()} is in {next_update_time_str}*",
@@ -56,8 +57,6 @@ class Rp(commands.Cog):
         """Shows a printout of the current info of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
-        value = rp.rp_datetime_incr_amount
-
         message_list = [
             f"### RP info for {rp.name}:",
             f"It is currently {rp.format_current_rp_time()}.",
@@ -69,31 +68,38 @@ class Rp(commands.Cog):
         # If both incr_unit and unit are the same, only include one
 
         # add unit first cuz assumed to be smaller.
-
-        next_incr_utc_timestamp = int(
-            convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
+        next_unit_utc_timestamp = int(
+            convert_datetime_to_utc_timestamp(rp.next_unit_datetime)
         )
         message_list += [
-            f"It will be {rp.format_next_rp_incr_time()} <t:{next_incr_utc_timestamp}:R>.",
-            f"It will be {rp.format_next_rp_incr_time()} in {rp.format_time_to_next_incr()}.",
+            f"It will be {rp.format_next_rp_time()} <t:{next_unit_utc_timestamp}:R>.",
         ]
+
+        if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
+            # if different add the increment unit display separately.
+            next_incr_utc_timestamp = int(
+                convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
+            )
+            message_list += [
+                f"It will be {rp.format_next_rp_incr_time()} <t:{next_incr_utc_timestamp}:R>.",
+            ]
 
         message = "\n".join(message_list)
 
         await ctx.send(message)
 
-    @commands.command()
-    async def test(self, ctx: commands.Context):
-        rp: RpHandler = self._get_rp(ctx=ctx)
+    # @commands.command()
+    # async def test(self, ctx: commands.Context):
+    #     rp: RpHandler = self._get_rp(ctx=ctx)
 
-        # message = "%s\n%s\n%s\n%s"
-        message = "TEST."
-        print(rp.num_units_in_incr)
-        print(rp.get_current_rp_unit_time())
-        print(rp.format_time_to_next_incr())
-        print(rp.get_time_to_next_rp_unit())
+    #     # message = "%s\n%s\n%s\n%s"
+    #     message = "TEST."
+    #     print(rp.num_units_in_incr)
+    #     print(rp.get_current_rp_unit_time())
+    #     print(rp.format_time_to_next_incr())
+    #     print(rp.get_time_to_next_rp_unit())
 
-        await ctx.send(message)
+    #     await ctx.send(message)
 
     # ====================== Commands END =======================================
 
@@ -298,6 +304,23 @@ class RpHandler:
 
         return initial + unit.value
 
+    # ================================ Time GETTERS =============================================
+
+    @property
+    def next_unit_datetime(self) -> datetime:
+        now = datetime.now()
+        time_since_incr = now - self.prev_incr_datetime
+        fraction_elapsed = time_since_incr / self.incr_interval
+
+        num_units_next_unit_time = math.ceil(fraction_elapsed * self.num_units_in_incr)
+
+        # These are some variable names.
+        next_unit_time_irl_time_from_last_incr = (
+            num_units_next_unit_time / self.num_units_in_incr * self.incr_interval
+        )
+
+        return next_unit_time_irl_time_from_last_incr + self.prev_incr_datetime
+
     def get_time_to_next_incr(self) -> timedelta:
         """Gets the real-life time until the next increment is scheduled.
 
@@ -315,19 +338,7 @@ class RpHandler:
             timedelta: Time until the next RP time.
         """
         now = datetime.now()
-        time_since_incr = now - self.prev_incr_datetime
-        fraction_elapsed = time_since_incr / self.incr_interval
-
-        num_units_next_unit_time = math.ceil(fraction_elapsed * self.num_units_in_incr)
-
-        # These are some variable names.
-        next_unit_time_irl_time_from_last_incr = (
-            num_units_next_unit_time / self.num_units_in_incr * self.incr_interval
-        )
-
-        time_to_next_unit_time = (
-            next_unit_time_irl_time_from_last_incr - time_since_incr
-        )
+        time_to_next_unit_time = self.next_unit_datetime - now
 
         return time_to_next_unit_time
 
