@@ -17,15 +17,18 @@ from cidderbot.utils.time_formatters import (
 # I can't type annotate cidder because of circular imports. Must mean this whole thing is incredibly jank.
 # And there probably is a "correct" way I can't be arsed to figure out.
 class Rp(commands.Cog):
-    def __init__(self, bot: commands.Bot, cidder):
+
+    def __init__(self, bot: commands.Bot, cidder: "cidderbot.cidder.Cidder"):
         self.bot = bot
         self.cidder = cidder
 
         for rp in self.cidder.rps:
             self.bot.loop.create_task(self.update_rp_regular_task(rp))
 
+    # ====================== Commands START =======================================
+
     @commands.command()
-    async def date(self, ctx):
+    async def date(self, ctx: commands.Context):
         """Shows the current date of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
@@ -39,7 +42,7 @@ class Rp(commands.Cog):
         await ctx.send(message)
 
     @commands.command()
-    async def info(self, ctx):
+    async def info(self, ctx: commands.Context):
         """Shows a printout of the current info of the RP."""
         rp: RpHandler = self._get_rp(ctx)
 
@@ -55,13 +58,28 @@ class Rp(commands.Cog):
 
         await ctx.send(message)
 
-    async def initialize(self):
+    @commands.command()
+    async def test(self, ctx: commands.Context):
+        rp: RpHandler = self._get_rp(ctx=ctx)
+
+        # message = "%s\n%s\n%s\n%s"
+        message = "TEST."
+        print(rp.num_units_in_incr)
+        print(rp.get_current_rp_unit())
+        print(rp.get_time_to_next_increment())
+        print(rp.get_time_to_next_rp_unit())
+
+        await ctx.send(message)
+
+    # ====================== Commands END =======================================
+
+    async def initialize(self) -> None:
         """Asynchronous initializations required for Rp."""
         # load scheduling events for all RPs
         for rp in self.cidder.rps:
             await self.update_rp_regular_task(rp)
 
-    def _get_rp(self, ctx) -> "RpHandler":
+    def _get_rp(self, ctx: commands.Context) -> "RpHandler":
         # very advanced code :+1:
         return self.cidder.get_rps_for_guild(ctx.guild)[0]
 
