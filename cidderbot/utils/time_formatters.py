@@ -14,6 +14,63 @@ class TimeUnit(Enum):
     YEAR = 31536000  # 365 days
 
 
+TIMEUNIT_MAPPING = {
+    TimeUnit.YEAR: {
+        TimeUnit.MONTH: 12,
+        TimeUnit.WEEK: 52,
+        TimeUnit.DAY: 365,
+        TimeUnit.HOUR: 365 * 24,
+        TimeUnit.MINUTE: 365 * 24 * 60,
+        TimeUnit.SECOND: 365 * 24 * 60 * 60,
+    },
+    TimeUnit.MONTH: {
+        TimeUnit.WEEK: 4,
+        TimeUnit.DAY: 30,
+        TimeUnit.HOUR: 30 * 24,
+        TimeUnit.MINUTE: 30 * 24 * 60,
+        TimeUnit.SECOND: 30 * 24 * 60 * 60,
+    },
+    TimeUnit.WEEK: {
+        TimeUnit.DAY: 7,
+        TimeUnit.HOUR: 7 * 24,
+        TimeUnit.MINUTE: 7 * 24 * 60,
+        TimeUnit.SECOND: 7 * 24 * 60 * 60,
+    },
+    TimeUnit.DAY: {
+        TimeUnit.HOUR: 24,
+        TimeUnit.MINUTE: 24 * 60,
+        TimeUnit.SECOND: 24 * 60 * 60,
+    },
+    TimeUnit.HOUR: {
+        TimeUnit.MINUTE: 60,
+        TimeUnit.SECOND: 60 * 60,
+    },
+    TimeUnit.MINUTE: {
+        TimeUnit.SECOND: 60,
+    },
+}
+
+
+def get_time_unit_mapping(time_unit_a: TimeUnit, time_unit_b: TimeUnit) -> int:
+    """Returns an integer n where n is an approximate number of time_b in time_unit_a.
+
+    Args:
+        time_unit_a (TimeUnit): Smaller time unit.
+        time_unit_b (TimeUnit): Larger time unit.
+
+    Returns:
+        int: Approximated integer number of time_unit_b in time_unit_a.
+            Returns 0 if time_unit_a is smaller than time_unit_b.
+    """
+
+    if time_unit_a.value < time_unit_b.value:
+        return 0
+    if time_unit_a == time_unit_b:
+        return 1
+
+    return TIMEUNIT_MAPPING[time_unit_a][time_unit_b]
+
+
 def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
     """Converts a `datetime.datetime` into a formatted string, based on a given unit.
 
