@@ -109,7 +109,8 @@ def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
 
     Args:
         td (timedelta): Duration to be formatted.
-        length_limit (int, optional): Limit for number of components in the time string. Defaults to 3.
+        length_limit (int, optional): Limit for number of components in the time string.
+            Must be a positive integer. Defaults to 3.
 
     Returns:
         str: Formatted string
@@ -149,7 +150,7 @@ def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
     # Join the parts with commas and 'and' for the last part
     if len(parts) == 0:
         return "now"
-    elif len(parts) == 1:
+    elif len(parts) == 1 or part_length_limit == 1:
         return parts[0]
     else:
         parts = parts[:part_length_limit]
