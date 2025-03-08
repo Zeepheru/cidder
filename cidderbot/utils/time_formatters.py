@@ -91,15 +91,15 @@ def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
 
     if unit == TimeUnit.YEAR:
         return dt.strftime("%Y")  # 1970
-    elif unit == TimeUnit.MONTH:
+    if unit == TimeUnit.MONTH:
         return dt.strftime("%B %Y")  # January 1970
-    elif unit == TimeUnit.WEEK:
+    if unit == TimeUnit.WEEK:
         return dt.strftime("Week %W, %Y")  # Week 00, 1970
-    elif unit == TimeUnit.DAY:
+    if unit == TimeUnit.DAY:
         return dt.strftime("%w %B %Y")  # 1 January 1970
-    elif unit == TimeUnit.HOUR:
+    if unit == TimeUnit.HOUR:
         return dt.strftime("%w %B %Y, %H:00")  # 1 January 1970, 12:00
-    elif unit == TimeUnit.MINUTE:
+    if unit == TimeUnit.MINUTE:
         return dt.strftime("%w %B %Y, %H:%M")  # 1 January 1970, 12:42
     return dt.strftime("%w %B %Y, %H:%M:%S")  # 1 January 1970, 12:42:00
 

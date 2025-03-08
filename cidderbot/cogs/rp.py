@@ -95,7 +95,7 @@ class Rp(commands.Cog):
             if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
                 next_rp_incr = format_timedelta(rp.get_time_to_next_incr(), 1)
                 message_list.append(
-                    f"It will be {rp.format_next_rp_time()} in {next_rp_incr}."
+                    f"It will be {rp.format_next_rp_incr_time()} in {next_rp_incr}."
                 )
 
         message = "\n".join(message_list)
