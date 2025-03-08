@@ -64,25 +64,39 @@ class Rp(commands.Cog):
             "",
         ]
 
+        use_discord_timestamp = False
+
         # Now add "It will be X rp datetime in Y duration"
         # If both incr_unit and unit are the same, only include one
 
         # add unit first cuz assumed to be smaller.
-        next_unit_utc_timestamp = int(
-            convert_datetime_to_utc_timestamp(rp.next_unit_datetime)
-        )
-        message_list += [
-            f"It will be {rp.format_next_rp_time()} <t:{next_unit_utc_timestamp}:R>.",
-        ]
-
-        if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
-            # if different add the increment unit display separately.
-            next_incr_utc_timestamp = int(
-                convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
+        # currently using discord timestamp is disabled based on user feedback
+        if use_discord_timestamp:
+            next_unit_utc_timestamp = int(
+                convert_datetime_to_utc_timestamp(rp.next_unit_datetime)
             )
             message_list += [
-                f"It will be {rp.format_next_rp_incr_time()} <t:{next_incr_utc_timestamp}:R>.",
+                f"It will be {rp.format_next_rp_time()} <t:{next_unit_utc_timestamp}:R>.",
             ]
+
+            if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
+                # if different add the increment unit display separately.
+                next_incr_utc_timestamp = int(
+                    convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
+                )
+                message_list += [
+                    f"It will be {rp.format_next_rp_incr_time()} <t:{next_incr_utc_timestamp}:R>.",
+                ]
+        else:
+            next_rp_time = format_timedelta(rp.get_time_to_next_rp_unit(), 1)
+            message_list.append(
+                f"It will be {rp.format_next_rp_time()} in {next_rp_time}."
+            )
+            if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
+                next_rp_incr = format_timedelta(rp.get_time_to_next_incr(), 1)
+                message_list.append(
+                    f"It will be {rp.format_next_rp_time()} in {next_rp_incr}."
+                )
 
         message = "\n".join(message_list)
 
