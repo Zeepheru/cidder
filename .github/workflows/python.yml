@@ -23,3 +23,13 @@ jobs:
     - name: Run Pylint
       run: |
         pylint $(git ls-files '*.py')
+
+    - name: Test and Generate Report
+      run: |
+        pip install pytest coverage
+        coverage run -m pytest
+    
+    - name: Upload Coverage Reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
