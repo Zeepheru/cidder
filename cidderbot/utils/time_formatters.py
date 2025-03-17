@@ -140,7 +140,7 @@ def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
             if days >= 4 and part_length_limit == 1:
                 weeks += 1
 
-            parts.append(0, f"{weeks} {'week' if weeks == 1 else 'weeks'}")
+            parts.append(f"{weeks} {'week' if weeks == 1 else 'weeks'}")
             part_length_limit -= 1
 
         if part_length_limit == 0:
