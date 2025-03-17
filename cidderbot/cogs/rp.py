@@ -40,12 +40,12 @@ class Rp(commands.Cog):
         rp: RpHandler = self._get_rp(ctx)
 
         curr_time_str = rp.format_current_rp_time()
-        next_update_time_str = rp.format_time_to_next_incr()
+        next_rp_time = format_timedelta(rp.get_time_to_next_rp_unit(), 3)
 
-        # TODO this currently won't display an increment values - i.e. only shows Next year instead of Next 2 years.
+        # TODO this currently won't display any increment values - i.e. only shows Next year instead of Next 2 years.
         messsage_list = [
             f"Current date in Sagrea is {curr_time_str}.",
-            f"-# *Next {rp.rp_datetime_incr_unit.name.lower()} is in {next_update_time_str}*",
+            f"-# *Next {rp.rp_datetime_unit.name.lower()} is in {next_rp_time}*",
         ]
 
         message = "\n".join(messsage_list)
