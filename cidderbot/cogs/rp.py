@@ -40,12 +40,12 @@ class Rp(commands.Cog):
         rp: RpHandler = self._get_rp(ctx)
 
         curr_time_str = rp.format_current_rp_time()
-        next_update_time_str = rp.format_time_to_next_incr()
+        next_rp_time = format_timedelta(rp.get_time_to_next_rp_unit(), 3)
 
-        # TODO this currently won't display an increment values - i.e. only shows Next year instead of Next 2 years.
+        # TODO this currently won't display any increment values - i.e. only shows Next year instead of Next 2 years.
         messsage_list = [
             f"Current date in Sagrea is {curr_time_str}.",
-            f"-# *Next {rp.rp_datetime_incr_unit.name.lower()} is in {next_update_time_str}*",
+            f"-# *Next {rp.rp_datetime_unit.name.lower()} is in {next_rp_time}*",
         ]
 
         message = "\n".join(messsage_list)
@@ -70,33 +70,23 @@ class Rp(commands.Cog):
         # If both incr_unit and unit are the same, only include one
 
         # add unit first cuz assumed to be smaller.
-        # currently using discord timestamp is disabled based on user feedback
-        if use_discord_timestamp:
-            next_unit_utc_timestamp = int(
-                convert_datetime_to_utc_timestamp(rp.next_unit_datetime)
+        # currently discord timestamp is disabled based on user feedback
+        use = False
+        next_unit_utc_timestamp = int(
+            convert_datetime_to_utc_timestamp(rp.next_unit_datetime)
+        )
+        next_rp_time = format_timedelta(rp.get_time_to_next_rp_unit(), 1)
+        message_list.append(
+            f"It will be {rp.format_next_rp_time()} in {next_rp_time}, at <t:{next_unit_utc_timestamp}:f>."
+        )
+        if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
+            next_incr_utc_timestamp = int(
+                convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
             )
-            message_list += [
-                f"It will be {rp.format_next_rp_time()} <t:{next_unit_utc_timestamp}:R>.",
-            ]
-
-            if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
-                # if different add the increment unit display separately.
-                next_incr_utc_timestamp = int(
-                    convert_datetime_to_utc_timestamp(rp.next_incr_datetime)
-                )
-                message_list += [
-                    f"It will be {rp.format_next_rp_incr_time()} <t:{next_incr_utc_timestamp}:R>.",
-                ]
-        else:
-            next_rp_time = format_timedelta(rp.get_time_to_next_rp_unit(), 1)
+            next_rp_incr = format_timedelta(rp.get_time_to_next_incr(), 1)
             message_list.append(
-                f"It will be {rp.format_next_rp_time()} in {next_rp_time}."
+                f"It will be {rp.format_next_rp_incr_time()} in {next_rp_incr}, at <t:{next_incr_utc_timestamp}:f>."
             )
-            if rp.rp_datetime_unit != rp.rp_datetime_incr_unit:
-                next_rp_incr = format_timedelta(rp.get_time_to_next_incr(), 1)
-                message_list.append(
-                    f"It will be {rp.format_next_rp_incr_time()} in {next_rp_incr}."
-                )
 
         message = "\n".join(message_list)
 

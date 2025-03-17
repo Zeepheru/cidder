@@ -23,3 +23,13 @@ jobs:
     - name: Run Pylint
       run: |
         pylint $(git ls-files '*.py')
+
+    - name: Run Tests and Generate Report
+      run: |
+        pip install pytest pytest-cov
+        pytest --cov=cidderbot --cov-branch --cov-report=xml
+    
+    - name: Upload Coverage Reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}

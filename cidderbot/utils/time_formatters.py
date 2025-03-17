@@ -107,6 +107,8 @@ def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
 def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
     """Formats a `datetime.timedelta` duration into a readable string.
 
+    Largest time unit output is weeks.
+
     Args:
         td (timedelta): Duration to be formatted.
         length_limit (int, optional): Limit for number of components in the time string.
@@ -116,7 +118,7 @@ def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
         str: Formatted string
     """
 
-    # Deepseek R1 :) - Mostly at least
+    # Originally prompted from Deepseek R1, significantly modified.
     part_length_limit = length_limit
 
     # Extract days, hours, minutes, seconds from the timedelta
@@ -125,48 +127,71 @@ def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
     hours, remainder = divmod(remainder, 3600)
     minutes, seconds = divmod(remainder, 60)
 
+    weeks, days = divmod(days, 7)
+
     # Create a list of formatted strings for each unit
     parts = []
 
-    if days > 0 and days < 7:
-        parts.append(f"{days} {'day' if days == 1 else 'days'}")
+    # oh gosh the repetition in this segment hurts me.
+    # But if I parameterized it into a loop, it'll be painful to read...
+    while True:
 
-    if hours > 0:
-        parts.append(f"{hours} {'hour' if hours == 1 else 'hours'}")
+        if weeks > 0:
+            if days >= 4 and part_length_limit == 1:
+                weeks += 1
 
-    if minutes > 0:
-        parts.append(f"{minutes} {'minute' if minutes == 1 else 'minutes'}")
+            parts.append(f"{weeks} {'week' if weeks == 1 else 'weeks'}")
+            part_length_limit -= 1
 
-    if seconds > 0:
-        parts.append(f"{seconds} {'second' if seconds == 1 else 'seconds'}")
+        if part_length_limit == 0:
+            break
 
-    # Handle weeks if days >= 7
-    if days >= 7:
-        weeks, days = divmod(days, 7)
-        parts.insert(0, f"{weeks} {'week' if weeks == 1 else 'weeks'}")
         if days > 0:
-            parts.insert(1, f"{days} {'day' if days == 1 else 'days'}")
+            if hours >= 12 and part_length_limit == 1:
+                days += 1
+
+            parts.append(f"{days} {'day' if days == 1 else 'days'}")
+            part_length_limit -= 1
+
+        if part_length_limit == 0:
+            break
+
+        if hours > 0:
+            if minutes >= 30 and part_length_limit == 1:
+                hours += 1
+
+            parts.append(f"{hours} {'hour' if hours == 1 else 'hours'}")
+            part_length_limit -= 1
+
+        if part_length_limit == 0:
+            break
+
+        if minutes > 0:
+            if seconds >= 30 and part_length_limit == 1:
+                minutes += 1
+
+            parts.append(f"{minutes} {'minute' if minutes == 1 else 'minutes'}")
+            part_length_limit -= 1
+
+        if part_length_limit == 0:
+            break
+
+        if seconds > 0:
+            # no need for any more rounding
+            parts.append(f"{seconds} {'second' if seconds == 1 else 'seconds'}")
+            part_length_limit -= 1
+
+        break
 
     # Join the parts with commas and 'and' for the last part
     if len(parts) == 0:
         return "now"
-    elif len(parts) == 1 or part_length_limit == 1:
+    elif len(parts) == 1:
         return parts[0]
     else:
-        parts = parts[:part_length_limit]
         return ", ".join(parts[:-1]) + f" and {parts[-1]}"
 
 
 def main():
-    print(format_timedelta(timedelta(seconds=1)))
-    print(format_timedelta(timedelta(seconds=12)))
-    print(format_timedelta(timedelta(seconds=121)))
-    print(format_timedelta(timedelta(seconds=1234)))
-    print(format_timedelta(timedelta(seconds=12351)))
-    print(format_timedelta(timedelta(seconds=252351)))
-    print(format_timedelta(timedelta(seconds=752351)))
-    print(format_timedelta(timedelta(seconds=1252351)))
-    print(format_timedelta(timedelta(seconds=86400 * 2)))
-    print(format_timedelta(timedelta(seconds=86400 * 6)))
-    print(format_timedelta(timedelta(seconds=86400 * 8)))
-    print(format_timedelta(timedelta(seconds=86400 * 15)))
+    print(format_timedelta(timedelta(seconds=90), 2))
+    print(format_timedelta(timedelta(seconds=90), 1))
