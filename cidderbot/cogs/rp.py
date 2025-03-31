@@ -306,7 +306,9 @@ class RpHandler:
                 month=months + initial.month,
             )
 
-        return initial + unit.value
+        add_delta = timedelta(seconds=unit.value * value)
+
+        return initial + add_delta
 
     # ================================ Time GETTERS =============================================
 

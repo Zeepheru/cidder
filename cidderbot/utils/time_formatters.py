@@ -96,12 +96,12 @@ def convert_time_unit_string(dt: datetime, unit: TimeUnit) -> str:
     if unit == TimeUnit.WEEK:
         return dt.strftime("Week %W, %Y")  # Week 00, 1970
     if unit == TimeUnit.DAY:
-        return dt.strftime("%w %B %Y")  # 1 January 1970
+        return dt.strftime("%d %B %Y")  # 1 January 1970
     if unit == TimeUnit.HOUR:
-        return dt.strftime("%w %B %Y, %H:00")  # 1 January 1970, 12:00
+        return dt.strftime("%d %B %Y, %H:00")  # 1 January 1970, 12:00
     if unit == TimeUnit.MINUTE:
-        return dt.strftime("%w %B %Y, %H:%M")  # 1 January 1970, 12:42
-    return dt.strftime("%w %B %Y, %H:%M:%S")  # 1 January 1970, 12:42:00
+        return dt.strftime("%d %B %Y, %H:%M")  # 1 January 1970, 12:42
+    return dt.strftime("%d %B %Y, %H:%M:%S")  # 1 January 1970, 12:42:00
 
 
 def format_timedelta(td: timedelta, length_limit: int = 3) -> str:
