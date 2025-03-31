@@ -117,6 +117,21 @@ class Rp(commands.Cog):
         # very advanced code :+1:
         return self.cidder.get_rps_for_guild(ctx.guild)[0]
 
+    def _get_custom_messages(self, rp: "RpHandler") -> str:
+        custom_messages = []
+
+        rp_dt = rp.get_current_rp_unit_time()
+
+        # april fools - only if the increment unit is DAY
+        if (
+            rp.rp_datetime_incr_unit == TimeUnit.DAY
+            and rp_dt.day == 1
+            and rp_dt.month == 4
+        ):
+            custom_messages.append("Happy April Fools!")
+
+        return "\n".join(custom_messages)
+
     async def update_rp(self, rp: "RpHandler") -> bool:
         """Updates the RP by incrementing the date,
         and sends a message to the update channel id specified in the rp instance.
@@ -147,6 +162,10 @@ class Rp(commands.Cog):
 
         # send message
         message = f"Time in {rp.name} is now {rp.format_current_rp_time()}."
+
+        # append extra messages depending on the RP
+        message += self._get_custom_messages(rp=rp)
+
         await channel.send(message)
 
         return True
