@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4  # Fetch the repository code
+      uses: actions/checkout@v5  # Fetch the repository code
 
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
