@@ -14,9 +14,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5  # Fetch the repository code
     
-      # Assumes the git repository already exists with remote set!
-      # this will not work if the dir doesn't exist or without the correct
-      # git remote.
+      # Assumptions required for CI to work:
+      # * local directory exists with git remote set up (so only pulling required)
+      # * systemd service setup and enabled
+      # * python3 venv setup to directory ./venv/
     - name: SSH and Deploy
       uses: appleboy/ssh-action@v0.1.10
       with:
