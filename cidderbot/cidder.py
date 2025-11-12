@@ -5,7 +5,7 @@ from typing import List
 
 import discord
 
-from cidderbot.cogs.rp import RpHandler
+from cidderbot.cogs.rp_old import RpHandler
 from cidderbot.utils.time_formatters import TimeUnit
 
 
@@ -38,37 +38,37 @@ class Cidder:
 
         # initialize RP Handler
         # load env vars (temp solution trust)
-        name = os.getenv("RP_NAME")
-        rp_datetime_unit = os.getenv("RP_DT_UNIT")
-        rp_datetime_incr_unit = os.getenv("RP_DT_INCR_UNIT")
-        rp_datetime_string = os.getenv("RP_DT_ISOSTRING")
-        rp_datetime_increment_amount = int(os.getenv("RP_DT_INCR_AMT"))
-        prev_datetime_string = os.getenv("PREV_INCR_DT_ISOSTRING")
-        increment_interval_secs = int(os.getenv("INCR_INTERVAL_SECONDS"))
+        # name = os.getenv("RP_NAME")
+        # rp_datetime_unit = os.getenv("RP_DT_UNIT")
+        # rp_datetime_incr_unit = os.getenv("RP_DT_INCR_UNIT")
+        # rp_datetime_string = os.getenv("RP_DT_ISOSTRING")
+        # rp_datetime_increment_amount = int(os.getenv("RP_DT_INCR_AMT"))
+        # prev_datetime_string = os.getenv("PREV_INCR_DT_ISOSTRING")
+        # increment_interval_secs = int(os.getenv("INCR_INTERVAL_SECONDS"))
 
-        channel_id = int(os.getenv("CHANNEL_ID"))
+        # channel_id = int(os.getenv("CHANNEL_ID"))
 
         # convert datetimes first
-        rp_datetime = datetime.fromisoformat(rp_datetime_string).replace(
-            tzinfo=timezone.utc
-        )
-        rp_last_datetime = datetime.fromisoformat(prev_datetime_string).replace(
-            tzinfo=timezone.utc
-        )
+        # rp_datetime = datetime.fromisoformat(rp_datetime_string).replace(
+        #     tzinfo=timezone.utc
+        # )
+        # rp_last_datetime = datetime.fromisoformat(prev_datetime_string).replace(
+        #     tzinfo=timezone.utc
+        # )
 
-        rp = RpHandler(
-            name=name,
-            guilds=self.guilds,
-            rp_datetime_unit=TimeUnit[rp_datetime_unit],
-            rp_datetime_incr_unit=TimeUnit[rp_datetime_incr_unit],
-            rp_datetime=rp_datetime,
-            rp_datetime_incr_amount=rp_datetime_increment_amount,
-            last_datetime=rp_last_datetime,
-            incr_interval=timedelta(seconds=increment_interval_secs),
-            channel_id=channel_id,
-        )
+        # rp = RpHandler(
+        #     name=name,
+        #     guilds=self.guilds,
+        #     rp_datetime_unit=TimeUnit[rp_datetime_unit],
+        #     rp_datetime_incr_unit=TimeUnit[rp_datetime_incr_unit],
+        #     rp_datetime=rp_datetime,
+        #     rp_datetime_incr_amount=rp_datetime_increment_amount,
+        #     last_datetime=rp_last_datetime,
+        #     incr_interval=timedelta(seconds=increment_interval_secs),
+        #     channel_id=channel_id,
+        # )
 
-        self.rps.append(rp)
+        # self.rps.append(rp)
 
         self._initialized = True
         logging.info("Main Cidder handler initialized.")
@@ -79,6 +79,7 @@ class Cidder:
             return False
         return True
 
+    # should be replaced
     def get_rps_for_guild(self, guild: discord.Guild) -> List[RpHandler]:
         """Returns a list of RPs associated with a particular guild.
 

@@ -5,18 +5,16 @@ import pkgutil
 
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
 
+from cidderbot import config
 from cidderbot.cidder import Cidder
-from cidderbot.cogs import rp
+from cidderbot.cogs import rp_old
 from cidderbot.events import events
+from cidderbot.services.database import init_db
+from cidderbot.services.scheduler import SchedulerService
 from cidderbot.utils.logging_utils import log_config
 
-# should move to a constants file
-TOKEN_STRING = "DISCORD_TOKEN"
-DEBUG_MODE_STRING = "DEBUG_MODE"
 COMMAND_PREFIX = "rp!"  # ok to define this here?
-# INTENTS_INTEGER = 182272
 
 
 class BotMain:
@@ -34,7 +32,7 @@ class BotMain:
         print("Bot initialising...")
 
         # load logger
-        is_debug = os.getenv(DEBUG_MODE_STRING) == "1"
+        is_debug = config.IS_DEBUG
         log_config_handler = log_config.LogConfig()
 
         log_config_handler.setup(is_debug=is_debug)
@@ -49,20 +47,25 @@ class BotMain:
             command_prefix=COMMAND_PREFIX, intents=self._setup_intents()
         )
 
-        # Create empty Cidder instance
-        self.cidder = Cidder()
+        # Create empty Cidder instance - no longer required
+        # self.cidder = Cidder()
 
         # load tokens and cogs
         self._load_tokens()
         self._logger.info("Token loading complete.")
 
+        # Create db
+        init_db()
+
         # creates events, including all the important initialization (this feels very jank)
-        events.BotEvents(self.bot, self.cidder)
+        events.BotEvents(bot=self.bot)
 
         # FINAL STATEMENT = blocking call
         self.bot.run(
-            self._token, log_handler=log_config_handler.get_discord_logging_handler()
+            self._token,
+            log_handler=log_config_handler.get_discord_logging_handler(),
         )
+        # FIN...
 
     def _setup_intents(self) -> discord.Intents:
         """Sets up Discord intents. Uses the default set of intents, plus `message_content`.
@@ -77,9 +80,7 @@ class BotMain:
 
     def _load_tokens(self) -> None:
         """Loads tokens into the object."""
-
-        load_dotenv()
-        self._token = os.getenv(TOKEN_STRING)
+        self._token = config.DISCORD_TOKEN
 
     # async def _load_cogs(self) -> None:
     #     """Loads Cogs (in `./cogs/*`) into the bot."""

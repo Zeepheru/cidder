@@ -5,6 +5,8 @@ from discord.ext import commands
 
 from cidderbot.cidder import Cidder
 from cidderbot.cogs import rp
+from cidderbot.services.rp_meta_service import RpMetaService
+from cidderbot.services.scheduler import SchedulerService
 
 
 class BotEvents:
@@ -14,23 +16,20 @@ class BotEvents:
     * on_ready() - Initialization event. Also includes proper Cidder startup.
     * on_message() - Event when a message is sent."""
 
-    def __init__(self, bot: commands.Bot, cidder: Cidder) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self._register_events(cidder)
         self._logger = logging.getLogger()
 
-    def _register_events(self, cidder: Cidder) -> None:
-        """Registers all events.
+        self._register_events()
 
-        Args:
-            cidder (Cidder): Cidder handler instance.
-        """
+    def _register_events(self) -> None:
+        """Registers all events."""
 
         @self.bot.event
         async def on_ready() -> None:
             """When the bot is ready.
 
-            Also handles startup procedures for Cidder's logic.
+            Also handles various service startup procedures.
 
             Loads cogs.
             """
@@ -51,15 +50,24 @@ class BotEvents:
             # logging.debug(self.bot.cogs)
             # logging.debug(self.bot.command_prefix)
 
-            cidder.initialize(guilds, channels, users)
+            # Startup scheduler
+            rp_meta_service = RpMetaService(self.bot)
+            scheduler = SchedulerService(self.bot, rp_meta_service)
+            queue = await scheduler.start()
+            self._logger.info(
+                "Scheduler started with %s pending events loaded.",
+                len(queue),
+            )
 
             # load cogs
-            rp_cog = rp.Rp(self.bot, cidder)
-            # await rp_cog.initialize()
+            rp_cog = rp.Rp(
+                self.bot,
+                rp_meta_service,
+            )
             await self.bot.add_cog(rp_cog)
 
-            logging.info("Cog loading complete.")
-            logging.info("[SUCCESS] CiDder loading complete.")
+            self._logger.info("Cog loading complete.")
+            self._logger.info("[SUCCESS] CiDder loading complete.")
 
         @self.bot.event
         async def on_message(message: discord.Message) -> None:

@@ -1,5 +1,7 @@
 from typing import List
 
+# UNUSED
+
 
 # Unkown whether these models are needed. Not used for the time being.
 class CidderGuild:
