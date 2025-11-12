@@ -22,6 +22,9 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         command_timeout: 30m
         script: | 
+            # Setup directory if not exists
+            mkdir -p /root/cidder
+
             # Navigate to the application directory
             cd /root/cidder
 
