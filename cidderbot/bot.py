@@ -20,8 +20,8 @@ COMMAND_PREFIX = "rp!"  # ok to define this here?
 class BotMain:
     """Class used to handle bot startup.
 
-    As the end of BotMain::__init__ is a blocking call to bot.run(),
-    proper management for the bot is handled in the Cidder class."""
+    As the end of BotMain::__init__ is a blocking call to bot.run()
+    """
 
     _logger: logging.Logger
 

@@ -24,9 +24,9 @@ from cidderbot.services.database import SessionLocal
 class RpMetaService:
 
     def __init__(self, bot: commands.Bot):
-        self._session = SessionLocal()
-        self.events = EventRepository(self._session)
-        self.rps = RpRepository(self._session)
+        self._session_factory = SessionLocal
+        self.events = EventRepository(self._session_factory)
+        self.rps = RpRepository(self._session_factory)
 
         self._bot = bot
 
@@ -54,16 +54,15 @@ class RpMetaService:
             num_passed_ticks = math.ceil(
                 (time_now - curr_exec_time) / rp.tickinterval_real
             )
-            print(num_passed_ticks)
+            # print(num_passed_ticks)
 
             rp.curr_time_rp += num_passed_ticks * rp.tickinterval_rp
-            self._session.commit()
             next_exec_time = curr_exec_time + num_passed_ticks * rp.tickinterval_real
 
-            print(rp.curr_time_rp, next_exec_time, curr_exec_time)
+            # print(rp.curr_time_rp, next_exec_time, curr_exec_time)
 
             # send update message to rp.update_channel_id
-            # TODO move somewhere else pls, having it here is BAD
+            # TODO move messaging somewhere else pls, having it here is BAD
             channel = self._bot.get_channel(rp.update_channel_id)
 
             if not channel:

@@ -6,8 +6,8 @@ from cidderbot.models.models import TickEvent
 
 
 class EventRepository:
-    def __init__(self, session):
-        self._session = session
+    def __init__(self, session_factory):
+        self._session_factory = session_factory
 
     """
     Required operations:
@@ -18,7 +18,7 @@ class EventRepository:
     """
 
     def add_tick_event(self, event: TickEvent):
-        session = self._session
+        session = self._session_factory()
         try:
             session.add(event)
             session.commit()
@@ -33,7 +33,7 @@ class EventRepository:
             session.close()
 
     def get_pending_events(self):
-        session = self._session
+        session = self._session_factory()
 
         try:
             stmt = select(TickEvent).where(TickEvent.status == "pending")

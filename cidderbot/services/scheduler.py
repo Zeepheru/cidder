@@ -15,9 +15,9 @@ from cidderbot.services.rp_meta_service import RpMetaService
 
 class SchedulerService:
     def __init__(self, bot: commands.Bot, rp_meta_service: "RpMetaService"):
-        self._session = SessionLocal()
-        self._rps = RpRepository(self._session)
-        self._events = EventRepository(self._session)
+        self._session_factory = SessionLocal
+        self._rps = RpRepository(self._session_factory)
+        self._events = EventRepository(self._session_factory)
 
         self._bot = bot
         self.rp_meta_service = rp_meta_service
@@ -59,54 +59,52 @@ class SchedulerService:
     async def _recover_pending_events(self):
         # Load all unexecuted events from DB
         pending = self._events.get_pending_events()
-        print(pending)  # debug
-
-        # print(self._queue)
 
         for event in pending:
-            # if event.execution_time <= datetime.now():
-            #     await self._execute_event(event)
-            #     self._session.commit()
-            #     print("finish execute", event.status)
-            # else:
-            heapq.heappush(self._queue, EventWrapper(event))
+            if event.execution_time <= datetime.now():
+                await self._execute_event(event)
+            else:
+                heapq.heappush(self._queue, EventWrapper(event))
 
-        print("FINISHED RECOVERY")
+        logging.info("Event recovery complete. %s events loaded.", len(pending))
 
     async def _run_loop(self):
         while self.running:
             if not self._queue:  # pq is empty
-                print("waiting")
                 await asyncio.sleep(1)
                 continue
 
             next_event = self._queue[0]
             if next_event.execution_time > datetime.now():
-                print("waiting")
                 await asyncio.sleep(next_event.execution_time - datetime.now())
 
             event = heapq.heappop(self._queue)
+            # print("executing", event.id, event.execution_time)
             await self._execute_event(event)
 
     async def _execute_event(self, event: TickEvent):
         try:
-            # assume tickevent
+            with self._session_factory() as session:
+                # Need to get fresh event from DB session
+                db_event = session.get(TickEvent, event.id)
+                if not db_event:
+                    logging.error("Event %s not found in DB", event.id)
+                    return
 
-            # call RpMetaService to initate update,
-            # and retrieve a new Event for insertion
-            await self.rp_meta_service.initiate_rp_tickover(event)
+                # assume event is tickevent for now
 
-            event.status = "completed"
-            print(event.status, event.id)
-            print(self._session.dirty)
-            self._session.commit()
-            print(event)
+                db_event.status = "completed"
+
+                # call RpMetaService to initate update,
+                # and retrieve a new Event for insertion
+                await self.rp_meta_service.initiate_rp_tickover(event)
+
+                session.commit()
         except Exception as e:
-            event.status = "failed"
+            db_event.status = "failed"
             logging.error("Event execution failed", e)
         finally:
-            # commit status update
-            self._session.commit()
+            pass
 
     # ==== EVENT GETTERS =====
     # def get_events_for_rp(self, rp_id: int):
